@@ -10,66 +10,6 @@ window.__ModuleLoader__.load({
 		/** Every skin, ordered by packages/skins/<name>/skin.json `order`. */
 		const SKIN_CENTER_ENTRIES = [
 			{
-				"id": "blue-fantasy",
-				"name": "蓝色幻想",
-				"nameEn": "Blue Fantasy",
-				"author": "powerdog996（DreamSkin 社区）· dsh-web-ui 适配",
-				"tagline": "鲸鱼插画背景 · periwinkle 靛蓝调色板 · 半透明面板",
-				"description": "DreamSkin「DeepSeek-鲸鱼娘」Codex 桌面主题的 dsh 适配：鲸鱼插画背景垫在半透明面板之下，遮罩随亮/暗主题实时切换，periwinkle 靛蓝色调重映射到全部 dsh token。",
-				"tags": [
-					"dreamskin",
-					"whale",
-					"indigo",
-					"art",
-					"translucent"
-				],
-				"accent": "#4a5fa8",
-				"bodyAttr": "data-dsh-blue-fantasy",
-				"package": "@linxin666/dsh-client-ui-skin-blue-fantasy",
-				"order": 1
-			},
-			{
-				"id": "whale-song",
-				"name": "鲸吟",
-				"nameEn": "Whale Song",
-				"author": "dsh-web-ui",
-				"tagline": "深海鲸语女神背景 · 冰蓝海洋调色板 · 金色细线点缀",
-				"description": "《鲸吟》— 深海鲸语女神主题：无文字纯氛围背景画（蓝发女神与鲸群居左、冰蓝星座网格与金线点缀、右侧大量留白）垫在半透明面板之下，遮罩随亮/暗主题实时切换，冰蓝/浅青/深海军蓝/钴蓝冷色体系重映射到全部 dsh token，暗色变体为深海夜航调。",
-				"tags": [
-					"whale",
-					"ocean",
-					"ice-blue",
-					"goddess",
-					"art",
-					"translucent"
-				],
-				"accent": "#4d8fd4",
-				"bodyAttr": "data-dsh-whale-song",
-				"package": "@linxin666/dsh-client-ui-skin-whale-song",
-				"order": 2
-			},
-			{
-				"id": "harbor",
-				"name": "夕港",
-				"nameEn": "Harbor",
-				"author": "moeblack",
-				"tagline": "暮光蓝港 · 日落橙辉 · 半透明夜色面板",
-				"description": "《夕港》黄昏港口主题：动漫少女黄昏港口背景（暮光蓝天空渐入日落橙）垫在半透明面板之下，遮罩随亮/暗主题实时切换，深暮蓝 #141a2e 底与日落橙 #ff9d5c 主色重映射到 dsh token，亮色是薄暮纱、暗色是深海夜航纱，同一幅画两种读法。",
-				"tags": [
-					"harbor",
-					"dusk",
-					"twilight",
-					"sunset",
-					"amber",
-					"art",
-					"translucent"
-				],
-				"accent": "#ff9d5c",
-				"bodyAttr": "data-dsh-harbor",
-				"package": "@linxin666/dsh-client-ui-skin-harbor",
-				"order": 3
-			},
-			{
 				"id": "qq98",
 				"name": "QQ2008 怀旧版",
 				"nameEn": "QQ2008 Retro",
@@ -86,7 +26,7 @@ window.__ModuleLoader__.load({
 				"accent": "#2b7cd9",
 				"bodyAttr": "data-dsh-retro",
 				"package": "@linxin666/dsh-client-ui-skin-qq98",
-				"order": 4
+				"order": 1
 			},
 			{
 				"id": "ths",
@@ -104,7 +44,7 @@ window.__ModuleLoader__.load({
 				"accent": "#e60012",
 				"bodyAttr": "data-dsh-ths",
 				"package": "@linxin666/dsh-client-ui-skin-ths",
-				"order": 5
+				"order": 2
 			},
 			{
 				"id": "xp",
@@ -123,7 +63,26 @@ window.__ModuleLoader__.load({
 				"accent": "#316ac5",
 				"bodyAttr": "data-dsh-xp",
 				"package": "@linxin666/dsh-client-ui-skin-xp",
-				"order": 6
+				"order": 3
+			},
+			{
+				"id": "blue-fantasy",
+				"name": "蓝色幻想",
+				"nameEn": "Blue Fantasy",
+				"author": "powerdog996（DreamSkin 社区）· dsh-web-ui 适配",
+				"tagline": "鲸鱼插画背景 · periwinkle 靛蓝调色板 · 半透明面板",
+				"description": "DreamSkin「DeepSeek-鲸鱼娘」Codex 桌面主题的 dsh 适配：鲸鱼插画背景垫在半透明面板之下，遮罩随亮/暗主题实时切换，periwinkle 靛蓝色调重映射到全部 dsh token。",
+				"tags": [
+					"dreamskin",
+					"whale",
+					"indigo",
+					"art",
+					"translucent"
+				],
+				"accent": "#4a5fa8",
+				"bodyAttr": "data-dsh-blue-fantasy",
+				"package": "@linxin666/dsh-client-ui-skin-blue-fantasy",
+				"order": 4
 			},
 			{
 				"id": "dragon-heir",
@@ -143,7 +102,7 @@ window.__ModuleLoader__.load({
 				"accent": "#c3272b",
 				"bodyAttr": "data-dsh-dragon-heir",
 				"package": "@linxin666/dsh-client-ui-skin-dragon-heir",
-				"order": 7
+				"order": 5
 			},
 			{
 				"id": "minecraft",
@@ -163,7 +122,27 @@ window.__ModuleLoader__.load({
 				"accent": "#7cbd4b",
 				"bodyAttr": "data-dsh-minecraft",
 				"package": "@linxin666/dsh-client-ui-skin-minecraft",
-				"order": 8
+				"order": 6
+			},
+			{
+				"id": "whale-song",
+				"name": "鲸吟",
+				"nameEn": "Whale Song",
+				"author": "dsh-web-ui",
+				"tagline": "深海鲸语女神背景 · 冰蓝海洋调色板 · 金色细线点缀",
+				"description": "《鲸吟》— 深海鲸语女神主题：无文字纯氛围背景画（蓝发女神与鲸群居左、冰蓝星座网格与金线点缀、右侧大量留白）垫在半透明面板之下，遮罩随亮/暗主题实时切换，冰蓝/浅青/深海军蓝/钴蓝冷色体系重映射到全部 dsh token，暗色变体为深海夜航调。",
+				"tags": [
+					"whale",
+					"ocean",
+					"ice-blue",
+					"goddess",
+					"art",
+					"translucent"
+				],
+				"accent": "#4d8fd4",
+				"bodyAttr": "data-dsh-whale-song",
+				"package": "@linxin666/dsh-client-ui-skin-whale-song",
+				"order": 7
 			},
 			{
 				"id": "trading",
@@ -183,7 +162,7 @@ window.__ModuleLoader__.load({
 				"accent": "#f23645",
 				"bodyAttr": "data-dsh-trading",
 				"package": "@linxin666/dsh-client-ui-skin-trading",
-				"order": 9
+				"order": 8
 			},
 			{
 				"id": "miku",
@@ -203,36 +182,9 @@ window.__ModuleLoader__.load({
 				"accent": "#2e9bff",
 				"bodyAttr": "data-dsh-miku",
 				"package": "@linxin666/dsh-client-ui-skin-miku",
-				"order": 10
+				"order": 9
 			}
 		];
-		//#endregion
-		//#region src/client/manifest.ts
-		/**
-		* Boot-manifest readiness checks for the one-click apply flow.
-		*
-		* The host half writes the skin patch synchronously, but the web app's boot
-		* graph (the `window.__DSH_BOOT__` JSON inside the served HTML) is
-		* regenerated asynchronously by the config watcher. A page reloaded right
-		* after the patch write can therefore boot into the previous skin. These
-		* helpers let the frontend poll the served document until the manifest
-		* actually reflects the target before reloading.
-		* @module @linxin666/dsh-client-ui-skin-center/manifest
-		*/
-		/** Bundle URL pattern of any skin entry in the boot manifest. */
-		const SKIN_BUNDLE_URL = /\/plugins\/@linxin666\/dsh-client-ui-skin-(?!center)[a-z0-9-]+\/client\.js/;
-		/**
-		* Whether a served GUI document's boot manifest enables the given skin.
-		* A `null` target means the stock look: no skin bundle URL may be present
-		* (the skin-center plugin's own bundle always loads and is excluded).
-		* @param documentHtml - the served GUI document (contains the boot JSON).
-		* @param target - skin id, or `null` for the stock look.
-		* @returns whether the manifest already enables the target.
-		*/
-		function manifestHasSkin(documentHtml, target) {
-			if (target === null) return !SKIN_BUNDLE_URL.test(documentHtml);
-			return documentHtml.includes(`/plugins/@linxin666/dsh-client-ui-skin-${target}/client.js`);
-		}
 		//#endregion
 		//#region src/client/try-on.ts
 		/**
@@ -357,18 +309,6 @@ window.__ModuleLoader__.load({
 			*/
 			epoch = 0;
 			/**
-			* One package can be requested again before its first script load finishes
-			* (for example A -> B -> A). Share that materialization so two script tags
-			* never race to register the same module factory.
-			*/
-			pendingModules = /* @__PURE__ */ new Map();
-			/**
-			* Package selected by the newest async request. A superseded request for the
-			* same package must not invalidate the module/style now owned by that newer
-			* request when their shared load settles.
-			*/
-			requestedPackage = null;
-			/**
 			* Loads one skin's client bundle so its factory registers on the page's
 			* `__ModuleLoader__`. Defaults to a same-origin script tag from the host
 			* route `/api/skin-center/bundle/<id>`; tests inject a stub.
@@ -385,53 +325,29 @@ window.__ModuleLoader__.load({
 			get tryingOfficial() {
 				return this.session !== null && this.session.entry === null;
 			}
-			/**
-			* Start trying on `entry` (replaces any live session).
-			*
-			* When another skin is already being tried on, keep it mounted while the
-			* next bundle loads. Once the target is ready, tear down the old preview and
-			* mount the new one against the SAME captured active-skin snapshot. This
-			* avoids the expensive preview -> active -> preview round trip and prevents
-			* a flash of the active skin between consecutive try-ons.
-			* @returns whether this request mounted the target (false when superseded).
-			*/
+			/** Start trying on `entry` (replaces any live session). */
 			async tryOn(entry) {
-				if (entry.package === activeSkinEntry()?.package) return false;
+				if (entry.package === activeSkinEntry()?.package) return;
+				this.exit();
 				const epoch = ++this.epoch;
-				this.requestedPackage = entry.package;
-				let apply;
-				try {
-					apply = await this.loadModuleOnce(entry);
-				} catch (error) {
-					if (this.shouldCleanupRequest(entry, epoch)) this.cleanupModule(entry);
-					throw error;
-				}
-				if (epoch !== this.epoch) {
-					if (this.shouldCleanupRequest(entry, epoch)) this.cleanupModule(entry);
-					return false;
-				}
-				const previous = this.session;
-				let active;
-				if (previous === null) active = this.captureAndRetractActive();
-				else {
-					this.session = null;
-					previous.dispose();
-					if (previous.entry !== null) this.cleanupModule(previous.entry);
-					active = previous.active;
-				}
+				const active = this.captureAndRetractActive();
 				let dispose;
 				try {
-					dispose = this.applyLoaded(entry, apply);
+					dispose = await this.loadAndApply(entry);
 				} catch (error) {
 					if (epoch === this.epoch) this.restoreActive(active);
 					throw error;
+				}
+				if (epoch !== this.epoch) {
+					this.cleanupModule(entry);
+					dispose();
+					return;
 				}
 				this.session = {
 					entry,
 					dispose,
 					active
 				};
-				return true;
 			}
 			/**
 			* Try on the official stock look: retract the active skin's visual writes
@@ -440,20 +356,8 @@ window.__ModuleLoader__.load({
 			*/
 			tryOnOfficial() {
 				if (activeSkinEntry() === null) return;
+				this.exit();
 				this.epoch += 1;
-				this.requestedPackage = null;
-				const previous = this.session;
-				if (previous !== null) {
-					this.session = null;
-					previous.dispose();
-					if (previous.entry !== null) this.cleanupModule(previous.entry);
-					this.session = {
-						entry: null,
-						dispose: () => {},
-						active: previous.active
-					};
-					return;
-				}
 				const active = this.captureAndRetractActive();
 				this.session = {
 					entry: null,
@@ -463,44 +367,22 @@ window.__ModuleLoader__.load({
 			}
 			/** Exit the live session: dispose the tried-on skin, then restore the active skin. */
 			exit() {
-				this.epoch += 1;
-				this.requestedPackage = null;
 				const session = this.session;
 				if (session === null) return;
+				this.epoch += 1;
 				this.session = null;
 				session.dispose();
 				if (session.entry !== null) this.cleanupModule(session.entry);
 				this.restoreActive(session.active);
 			}
-			/** Share one materialization while repeated requests for a package overlap. */
-			loadModuleOnce(entry) {
-				const existing = this.pendingModules.get(entry.package);
-				if (existing !== void 0) return existing;
-				const pending = this.loadModule(entry);
-				this.pendingModules.set(entry.package, pending);
-				pending.then(() => {
-					if (this.pendingModules.get(entry.package) === pending) this.pendingModules.delete(entry.package);
-				}, () => {
-					if (this.pendingModules.get(entry.package) === pending) this.pendingModules.delete(entry.package);
-				});
-				return pending;
-			}
-			/** Whether this request still owns cleanup of the package module/style. */
-			shouldCleanupRequest(entry, epoch) {
-				return epoch === this.epoch || this.requestedPackage !== entry.package;
-			}
-			/** Execute + materialize the target skin through the real loader. */
-			async loadModule(entry) {
+			/** Execute + materialize + mount the target skin through the real loader. */
+			async loadAndApply(entry) {
 				const modules = window.__DSH_MODULES__;
 				if (modules === void 0) throw new Error("skin-center: window.__DSH_MODULES__ missing");
 				modules.invalidate(entry.package);
 				await this.loadBundle(entry);
 				const apply = (await modules.import(entry.package)).apply;
 				if (typeof apply !== "function") throw new Error(`skin-center: "${entry.package}" client bundle exports no apply`);
-				return apply;
-			}
-			/** Apply a module that has already been loaded while the active skin was visible. */
-			applyLoaded(entry, apply) {
 				const ctx = miniCtx();
 				try {
 					apply(ctx);
@@ -582,8 +464,8 @@ window.__ModuleLoader__.load({
 			}
 		};
 		//#endregion
-		//#region \0dsh-css:packages/skins/skin-center/src/client/skin-center.module.css.mjs
-		const css = "body[data-dsh-skin-center] .eDzMgW_pluginCard{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-3);border-radius:12px;list-style:none;transition:border-color .16s,background .16s}body[data-dsh-skin-center] .eDzMgW_pluginCard:hover{border-color:var(--dsw-alias-label-dimmed)}body[data-dsh-skin-center] .eDzMgW_pluginCardOpen{background:var(--dsw-alias-bg-layer-2);border-color:var(--dsw-alias-label-dimmed)}body[data-dsh-skin-center] .eDzMgW_cardHeader{appearance:none;width:100%;color:inherit;font:inherit;text-align:left;cursor:pointer;background:0 0;border:0;border-radius:12px;align-items:center;gap:12px;padding:14px 16px;display:flex}body[data-dsh-skin-center] .eDzMgW_cardHeader:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:-2px}body[data-dsh-skin-center] .eDzMgW_headText{flex-direction:column;flex:1;gap:4px;min-width:0;display:flex}body[data-dsh-skin-center] .eDzMgW_pluginName{color:var(--dsw-alias-label-primary);align-items:baseline;gap:8px;font-size:15px;font-weight:600;line-height:1.4;display:flex}body[data-dsh-skin-center] .eDzMgW_cardDescription{color:var(--dsw-alias-label-tertiary);font-size:13px;line-height:1.5}body[data-dsh-skin-center] .eDzMgW_chevron,body[data-dsh-skin-center] .eDzMgW_chevronOpen{color:var(--dsw-alias-label-tertiary);flex:none;transition:transform .16s}body[data-dsh-skin-center] .eDzMgW_chevronOpen{transform:rotate(180deg)}body[data-dsh-skin-center] .eDzMgW_cardBody{border-top:1px solid var(--dsw-alias-border-l2);flex-direction:column;gap:12px;margin:0 16px;padding:12px 0 8px;display:flex}body[data-dsh-skin-center] .eDzMgW_head{flex-direction:column;gap:6px;display:flex}body[data-dsh-skin-center] .eDzMgW_titleBadge{color:var(--dsw-alias-label-secondary,#6b7280);font-size:11px;font-weight:500}body[data-dsh-skin-center] .eDzMgW_intro{color:var(--dsw-alias-label-secondary,#6b7280);font-size:12.5px;line-height:1.55}body[data-dsh-skin-center] .eDzMgW_themeRow{align-items:center;gap:8px;margin-top:2px;display:flex}body[data-dsh-skin-center] .eDzMgW_themeLabel{color:var(--dsw-alias-label-secondary,#6b7280);margin-right:2px;font-size:12px}body[data-dsh-skin-center] .eDzMgW_themeButton{border:1px solid var(--dsw-alias-border-l3,#cbd5e1);background:var(--dsw-alias-bg-layer-2,#fff);color:var(--dsw-alias-label-primary,#172a45);cursor:pointer;border-radius:6px;padding:5px 10px;font-size:12px;line-height:1;transition:background .12s,border-color .12s,color .12s}body[data-dsh-skin-center] .eDzMgW_themeButton:hover{border-color:var(--dsw-alias-border-l4,#94a3b8)}body[data-dsh-skin-center] .eDzMgW_themeButton:active{border-color:var(--dsw-alias-brand-primary,#2b7cd9);background:var(--dsw-alias-button-primary-dimmed,#e8f1fc);color:var(--dsw-alias-brand-primary,#1e63b8)}body[data-dsh-skin-center] .eDzMgW_themeButton:focus-visible{outline:2px solid var(--dsw-alias-brand-primary,#2b7cd9);outline-offset:2px}body[data-dsh-skin-center] .eDzMgW_themeButtonActive{border-color:var(--dsw-alias-brand-primary,#2b7cd9);background:var(--dsw-alias-button-primary-dimmed,#e8f1fc);color:var(--dsw-alias-brand-primary,#1e63b8)}body[data-dsh-skin-center] .eDzMgW_list{flex-direction:column;gap:10px;display:flex}body[data-dsh-skin-center] .eDzMgW_card{border:1px solid var(--dsw-alias-border-l1,#e2e8f0);background:var(--dsw-alias-bg-layer-2,#fff);border-radius:10px;flex-direction:column;gap:8px;padding:12px 14px;display:flex}body[data-dsh-skin-center] .eDzMgW_cardHead{align-items:center;gap:10px;min-width:0;display:flex}body[data-dsh-skin-center] .eDzMgW_swatch{width:14px;height:14px;box-shadow:inset 0 0 0 1px var(--dsw-alias-border-l4,#0f172a1f);border-radius:50%;flex:none}body[data-dsh-skin-center] .eDzMgW_cardName{text-overflow:ellipsis;white-space:nowrap;min-width:0;font-size:13.5px;font-weight:600;overflow:hidden}body[data-dsh-skin-center] .eDzMgW_cardTagline{color:var(--dsw-alias-label-secondary,#6b7280);font-size:12px;line-height:1.45}body[data-dsh-skin-center] .eDzMgW_badge{letter-spacing:.02em;border-radius:999px;flex:none;min-width:0;margin-left:auto;padding:2px 8px;font-size:11px;font-weight:600}body[data-dsh-skin-center] .eDzMgW_badgeActive{color:var(--dsw-alias-state-success-primary,#0f6b3a);background:var(--dsw-alias-state-success-tertiary,#dcf3e5)}body[data-dsh-skin-center] .eDzMgW_badgeTrying{color:var(--dsw-alias-brand-primary,#1e63b8);background:var(--dsw-alias-button-primary-dimmed,#e2edfc)}body[data-dsh-skin-center] .eDzMgW_actions{flex-wrap:wrap;align-items:center;gap:8px;display:flex}body[data-dsh-skin-center] .eDzMgW_button{border:1px solid var(--dsw-alias-border-l3,#cbd5e1);background:var(--dsw-alias-bg-layer-2,#fff);color:var(--dsw-alias-label-primary,#172a45);cursor:pointer;border-radius:7px;padding:6px 12px;font-size:12px;line-height:1;transition:background .12s,border-color .12s,color .12s}body[data-dsh-skin-center] .eDzMgW_button:hover:not(:disabled){border-color:var(--dsw-alias-brand-primary,#2b7cd9);color:var(--dsw-alias-brand-primary,#1e63b8)}body[data-dsh-skin-center] .eDzMgW_button:active:not(:disabled){border-color:var(--dsw-alias-button-primary-hover,#1e63b8);background:var(--dsw-alias-button-primary-dimmed,#e8f1fc);color:var(--dsw-alias-brand-primary,#1e63b8)}body[data-dsh-skin-center] .eDzMgW_button:focus-visible{outline:2px solid var(--dsw-alias-brand-primary,#2b7cd9);outline-offset:2px}body[data-dsh-skin-center] .eDzMgW_buttonPrimary{border-color:var(--dsw-alias-brand-primary,#2b7cd9);background:var(--dsw-alias-button-primary-fill,#2b7cd9);color:var(--dsw-alias-label-primary-foreground,#fff)}body[data-dsh-skin-center] .eDzMgW_buttonPrimary:hover:not(:disabled){border-color:var(--dsw-alias-button-primary-hover,#1e63b8);background:var(--dsw-alias-button-primary-hover,#1e63b8);color:var(--dsw-alias-label-primary-foreground,#fff)}body[data-dsh-skin-center] .eDzMgW_buttonPrimary:active:not(:disabled),body[data-dsh-skin-center] .eDzMgW_buttonPrimary:focus-visible:not(:disabled){border-color:var(--dsw-alias-button-primary-hover,#1e63b8);background:var(--dsw-alias-button-primary-hover,#1e63b8)}body[data-dsh-skin-center] .eDzMgW_buttonGhost{background:0 0;border-color:#0000}body[data-dsh-skin-center] .eDzMgW_button:disabled{opacity:.55;cursor:default}body[data-dsh-skin-center] .eDzMgW_error{color:var(--dsw-alias-state-error-primary,#b42318);font-size:12px}body[data-dsh-skin-center] .eDzMgW_backgroundRow{flex-direction:column;gap:6px;padding:8px 0;display:flex}body[data-dsh-skin-center] .eDzMgW_backgroundHead{align-items:center;gap:8px;display:flex}body[data-dsh-skin-center] .eDzMgW_backgroundLabel{color:var(--dsw-alias-label-primary,#172a45);font-size:12.5px;font-weight:600}body[data-dsh-skin-center] .eDzMgW_backgroundValue{font-variant-numeric:tabular-nums;color:var(--dsw-alias-brand-primary,#2b7cd9);flex:none;margin-left:auto;font-size:12px}body[data-dsh-skin-center] .eDzMgW_backgroundRange{background:var(--dsw-alias-bg-layer-3,#e2e8f0);-webkit-appearance:none;appearance:none;cursor:pointer;border-radius:999px;width:100%;height:4px;margin:0}body[data-dsh-skin-center] .eDzMgW_backgroundRange::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;border:2px solid var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-brand-primary,#2b7cd9);width:14px;height:14px;box-shadow:0 0 0 1px var(--dsw-alias-border-l4,#0f172a1f);cursor:pointer;border-radius:50%}body[data-dsh-skin-center] .eDzMgW_backgroundRange::-moz-range-thumb{border:2px solid var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-brand-primary,#2b7cd9);width:12px;height:12px;box-shadow:0 0 0 1px var(--dsw-alias-border-l4,#0f172a1f);cursor:pointer;border-radius:50%}body[data-dsh-skin-center] .eDzMgW_backgroundRange:focus-visible{outline:2px solid var(--dsw-alias-brand-primary,#2b7cd9);outline-offset:2px}body[data-dsh-skin-center] .eDzMgW_backgroundHint{color:var(--dsw-alias-label-secondary,#6b7280);font-size:12px;line-height:1.5}body[data-dsh-skin-center] .eDzMgW_backgroundHintMuted{color:var(--dsw-alias-label-tertiary,#9aa4b5);font-size:12px;line-height:1.5}@media (prefers-reduced-motion:reduce){body[data-dsh-skin-center] .eDzMgW_pluginCard,body[data-dsh-skin-center] .eDzMgW_cardHeader,body[data-dsh-skin-center] .eDzMgW_themeButton,body[data-dsh-skin-center] .eDzMgW_button,body[data-dsh-skin-center] .eDzMgW_chevron,body[data-dsh-skin-center] .eDzMgW_chevronOpen{transition:none}}";
+		//#region \0dsh-css:/home/runner/work/dsh-web-ui/dsh-web-ui/packages/skins/skin-center/src/client/skin-center.module.css.mjs
+		const css = "body[data-dsh-skin-center] .aIQHxa_pluginCard{border:1px solid var(--dsw-alias-border-l1,#e2e8f0);background:var(--dsw-alias-bg-layer-2,#fff);border-radius:8px;list-style:none;overflow:hidden}body[data-dsh-skin-center] .aIQHxa_cardHeader{width:100%;color:inherit;font:inherit;text-align:left;cursor:pointer;background:0 0;border:0;align-items:center;padding:11px 14px;transition:background .12s;display:flex}body[data-dsh-skin-center] .aIQHxa_cardHeader:hover{background:var(--dsw-alias-bg-layer-1,#f1f5f9)}body[data-dsh-skin-center] .aIQHxa_cardHeader:active{background:var(--dsw-alias-bg-layer-3,#e6ecf4)}body[data-dsh-skin-center] .aIQHxa_cardHeader:focus-visible{outline:2px solid var(--dsw-alias-brand-primary,#2b7cd9);outline-offset:2px}body[data-dsh-skin-center] .aIQHxa_headText{flex-direction:column;flex:1;gap:3px;min-width:0;display:flex}body[data-dsh-skin-center] .aIQHxa_pluginName{color:var(--dsw-alias-label-primary,#172a45);align-items:baseline;gap:8px;font-size:13.5px;font-weight:600;display:flex}body[data-dsh-skin-center] .aIQHxa_cardDescription{color:var(--dsw-alias-label-secondary,#6b7280);font-size:12px;line-height:1.4}body[data-dsh-skin-center] .aIQHxa_chevron,body[data-dsh-skin-center] .aIQHxa_chevronOpen{color:var(--dsw-alias-label-secondary,#6b7280);flex:none;margin-left:10px;font-size:12px;transition:transform .12s}body[data-dsh-skin-center] .aIQHxa_chevronOpen{transform:rotate(180deg)}body[data-dsh-skin-center] .aIQHxa_cardBody{border-top:1px solid var(--dsw-alias-border-l1,#e2e8f0);flex-direction:column;gap:12px;padding:12px 14px 14px;display:flex}body[data-dsh-skin-center] .aIQHxa_head{flex-direction:column;gap:6px;display:flex}body[data-dsh-skin-center] .aIQHxa_titleBadge{color:var(--dsw-alias-label-secondary,#6b7280);font-size:11px;font-weight:500}body[data-dsh-skin-center] .aIQHxa_intro{color:var(--dsw-alias-label-secondary,#6b7280);font-size:12.5px;line-height:1.55}body[data-dsh-skin-center] .aIQHxa_themeRow{align-items:center;gap:8px;margin-top:2px;display:flex}body[data-dsh-skin-center] .aIQHxa_themeLabel{color:var(--dsw-alias-label-secondary,#6b7280);margin-right:2px;font-size:12px}body[data-dsh-skin-center] .aIQHxa_themeButton{border:1px solid var(--dsw-alias-border-l3,#cbd5e1);background:var(--dsw-alias-bg-layer-2,#fff);color:var(--dsw-alias-label-primary,#172a45);cursor:pointer;border-radius:6px;padding:5px 10px;font-size:12px;line-height:1;transition:background .12s,border-color .12s,color .12s}body[data-dsh-skin-center] .aIQHxa_themeButton:hover{border-color:var(--dsw-alias-border-l4,#94a3b8)}body[data-dsh-skin-center] .aIQHxa_themeButton:active{border-color:var(--dsw-alias-brand-primary,#2b7cd9);background:var(--dsw-alias-button-primary-dimmed,#e8f1fc);color:var(--dsw-alias-brand-primary,#1e63b8)}body[data-dsh-skin-center] .aIQHxa_themeButton:focus-visible{outline:2px solid var(--dsw-alias-brand-primary,#2b7cd9);outline-offset:2px}body[data-dsh-skin-center] .aIQHxa_themeButtonActive{border-color:var(--dsw-alias-brand-primary,#2b7cd9);background:var(--dsw-alias-button-primary-dimmed,#e8f1fc);color:var(--dsw-alias-brand-primary,#1e63b8)}body[data-dsh-skin-center] .aIQHxa_list{flex-direction:column;gap:10px;display:flex}body[data-dsh-skin-center] .aIQHxa_card{border:1px solid var(--dsw-alias-border-l1,#e2e8f0);background:var(--dsw-alias-bg-layer-2,#fff);border-radius:10px;flex-direction:column;gap:8px;padding:12px 14px;display:flex}body[data-dsh-skin-center] .aIQHxa_cardHead{align-items:center;gap:10px;min-width:0;display:flex}body[data-dsh-skin-center] .aIQHxa_swatch{width:14px;height:14px;box-shadow:inset 0 0 0 1px var(--dsw-alias-border-l4,#0f172a1f);border-radius:50%;flex:none}body[data-dsh-skin-center] .aIQHxa_cardName{text-overflow:ellipsis;white-space:nowrap;min-width:0;font-size:13.5px;font-weight:600;overflow:hidden}body[data-dsh-skin-center] .aIQHxa_cardTagline{color:var(--dsw-alias-label-secondary,#6b7280);font-size:12px;line-height:1.45}body[data-dsh-skin-center] .aIQHxa_badge{letter-spacing:.02em;border-radius:999px;flex:none;min-width:0;margin-left:auto;padding:2px 8px;font-size:11px;font-weight:600}body[data-dsh-skin-center] .aIQHxa_badgeActive{color:var(--dsw-alias-state-success-primary,#0f6b3a);background:var(--dsw-alias-state-success-tertiary,#dcf3e5)}body[data-dsh-skin-center] .aIQHxa_badgeTrying{color:var(--dsw-alias-brand-primary,#1e63b8);background:var(--dsw-alias-button-primary-dimmed,#e2edfc)}body[data-dsh-skin-center] .aIQHxa_actions{flex-wrap:wrap;align-items:center;gap:8px;display:flex}body[data-dsh-skin-center] .aIQHxa_button{border:1px solid var(--dsw-alias-border-l3,#cbd5e1);background:var(--dsw-alias-bg-layer-2,#fff);color:var(--dsw-alias-label-primary,#172a45);cursor:pointer;border-radius:7px;padding:6px 12px;font-size:12px;line-height:1;transition:background .12s,border-color .12s,color .12s}body[data-dsh-skin-center] .aIQHxa_button:hover:not(:disabled){border-color:var(--dsw-alias-brand-primary,#2b7cd9);color:var(--dsw-alias-brand-primary,#1e63b8)}body[data-dsh-skin-center] .aIQHxa_button:active:not(:disabled){border-color:var(--dsw-alias-button-primary-hover,#1e63b8);background:var(--dsw-alias-button-primary-dimmed,#e8f1fc);color:var(--dsw-alias-brand-primary,#1e63b8)}body[data-dsh-skin-center] .aIQHxa_button:focus-visible{outline:2px solid var(--dsw-alias-brand-primary,#2b7cd9);outline-offset:2px}body[data-dsh-skin-center] .aIQHxa_buttonPrimary{border-color:var(--dsw-alias-brand-primary,#2b7cd9);background:var(--dsw-alias-button-primary-fill,#2b7cd9);color:var(--dsw-alias-label-primary-foreground,#fff)}body[data-dsh-skin-center] .aIQHxa_buttonPrimary:hover:not(:disabled){border-color:var(--dsw-alias-button-primary-hover,#1e63b8);background:var(--dsw-alias-button-primary-hover,#1e63b8);color:var(--dsw-alias-label-primary-foreground,#fff)}body[data-dsh-skin-center] .aIQHxa_buttonPrimary:active:not(:disabled),body[data-dsh-skin-center] .aIQHxa_buttonPrimary:focus-visible:not(:disabled){border-color:var(--dsw-alias-button-primary-hover,#1e63b8);background:var(--dsw-alias-button-primary-hover,#1e63b8)}body[data-dsh-skin-center] .aIQHxa_buttonGhost{background:0 0;border-color:#0000}body[data-dsh-skin-center] .aIQHxa_button:disabled{opacity:.55;cursor:default}body[data-dsh-skin-center] .aIQHxa_error{color:var(--dsw-alias-state-error-primary,#b42318);font-size:12px}body[data-dsh-skin-center] .aIQHxa_backgroundRow{flex-direction:column;gap:6px;padding:8px 0;display:flex}body[data-dsh-skin-center] .aIQHxa_backgroundHead{align-items:center;gap:8px;display:flex}body[data-dsh-skin-center] .aIQHxa_backgroundLabel{color:var(--dsw-alias-label-primary,#172a45);font-size:12.5px;font-weight:600}body[data-dsh-skin-center] .aIQHxa_backgroundValue{font-variant-numeric:tabular-nums;color:var(--dsw-alias-brand-primary,#2b7cd9);flex:none;margin-left:auto;font-size:12px}body[data-dsh-skin-center] .aIQHxa_backgroundRange{background:var(--dsw-alias-bg-layer-3,#e2e8f0);-webkit-appearance:none;appearance:none;cursor:pointer;border-radius:999px;width:100%;height:4px;margin:0}body[data-dsh-skin-center] .aIQHxa_backgroundRange::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;border:2px solid var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-brand-primary,#2b7cd9);width:14px;height:14px;box-shadow:0 0 0 1px var(--dsw-alias-border-l4,#0f172a1f);cursor:pointer;border-radius:50%}body[data-dsh-skin-center] .aIQHxa_backgroundRange::-moz-range-thumb{border:2px solid var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-brand-primary,#2b7cd9);width:12px;height:12px;box-shadow:0 0 0 1px var(--dsw-alias-border-l4,#0f172a1f);cursor:pointer;border-radius:50%}body[data-dsh-skin-center] .aIQHxa_backgroundRange:focus-visible{outline:2px solid var(--dsw-alias-brand-primary,#2b7cd9);outline-offset:2px}body[data-dsh-skin-center] .aIQHxa_backgroundHint{color:var(--dsw-alias-label-secondary,#6b7280);font-size:12px;line-height:1.5}body[data-dsh-skin-center] .aIQHxa_backgroundHintMuted{color:var(--dsw-alias-label-tertiary,#9aa4b5);font-size:12px;line-height:1.5}@media (prefers-reduced-motion:reduce){body[data-dsh-skin-center] .aIQHxa_cardHeader,body[data-dsh-skin-center] .aIQHxa_themeButton,body[data-dsh-skin-center] .aIQHxa_button,body[data-dsh-skin-center] .aIQHxa_chevron,body[data-dsh-skin-center] .aIQHxa_chevronOpen{transition:none}}";
 		const tagId = "@linxin666/dsh-client-ui-skin-center/skin-center.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
 			const tag = document.createElement("style");
@@ -593,43 +475,42 @@ window.__ModuleLoader__.load({
 			document.head.appendChild(tag);
 		}
 		var skin_center_module_css_default = {
-			"actions": "eDzMgW_actions",
-			"backgroundHead": "eDzMgW_backgroundHead",
-			"backgroundHint": "eDzMgW_backgroundHint",
-			"backgroundHintMuted": "eDzMgW_backgroundHintMuted",
-			"backgroundLabel": "eDzMgW_backgroundLabel",
-			"backgroundRange": "eDzMgW_backgroundRange",
-			"backgroundRow": "eDzMgW_backgroundRow",
-			"backgroundValue": "eDzMgW_backgroundValue",
-			"badge": "eDzMgW_badge",
-			"badgeActive": "eDzMgW_badgeActive",
-			"badgeTrying": "eDzMgW_badgeTrying",
-			"button": "eDzMgW_button",
-			"buttonGhost": "eDzMgW_buttonGhost",
-			"buttonPrimary": "eDzMgW_buttonPrimary",
-			"card": "eDzMgW_card",
-			"cardBody": "eDzMgW_cardBody",
-			"cardDescription": "eDzMgW_cardDescription",
-			"cardHead": "eDzMgW_cardHead",
-			"cardHeader": "eDzMgW_cardHeader",
-			"cardName": "eDzMgW_cardName",
-			"cardTagline": "eDzMgW_cardTagline",
-			"chevron": "eDzMgW_chevron",
-			"chevronOpen": "eDzMgW_chevronOpen",
-			"error": "eDzMgW_error",
-			"head": "eDzMgW_head",
-			"headText": "eDzMgW_headText",
-			"intro": "eDzMgW_intro",
-			"list": "eDzMgW_list",
-			"pluginCard": "eDzMgW_pluginCard",
-			"pluginCardOpen": "eDzMgW_pluginCardOpen",
-			"pluginName": "eDzMgW_pluginName",
-			"swatch": "eDzMgW_swatch",
-			"themeButton": "eDzMgW_themeButton",
-			"themeButtonActive": "eDzMgW_themeButtonActive",
-			"themeLabel": "eDzMgW_themeLabel",
-			"themeRow": "eDzMgW_themeRow",
-			"titleBadge": "eDzMgW_titleBadge"
+			"actions": "aIQHxa_actions",
+			"backgroundHead": "aIQHxa_backgroundHead",
+			"backgroundHint": "aIQHxa_backgroundHint",
+			"backgroundHintMuted": "aIQHxa_backgroundHintMuted",
+			"backgroundLabel": "aIQHxa_backgroundLabel",
+			"backgroundRange": "aIQHxa_backgroundRange",
+			"backgroundRow": "aIQHxa_backgroundRow",
+			"backgroundValue": "aIQHxa_backgroundValue",
+			"badge": "aIQHxa_badge",
+			"badgeActive": "aIQHxa_badgeActive",
+			"badgeTrying": "aIQHxa_badgeTrying",
+			"button": "aIQHxa_button",
+			"buttonGhost": "aIQHxa_buttonGhost",
+			"buttonPrimary": "aIQHxa_buttonPrimary",
+			"card": "aIQHxa_card",
+			"cardBody": "aIQHxa_cardBody",
+			"cardDescription": "aIQHxa_cardDescription",
+			"cardHead": "aIQHxa_cardHead",
+			"cardHeader": "aIQHxa_cardHeader",
+			"cardName": "aIQHxa_cardName",
+			"cardTagline": "aIQHxa_cardTagline",
+			"chevron": "aIQHxa_chevron",
+			"chevronOpen": "aIQHxa_chevronOpen",
+			"error": "aIQHxa_error",
+			"head": "aIQHxa_head",
+			"headText": "aIQHxa_headText",
+			"intro": "aIQHxa_intro",
+			"list": "aIQHxa_list",
+			"pluginCard": "aIQHxa_pluginCard",
+			"pluginName": "aIQHxa_pluginName",
+			"swatch": "aIQHxa_swatch",
+			"themeButton": "aIQHxa_themeButton",
+			"themeButtonActive": "aIQHxa_themeButtonActive",
+			"themeLabel": "aIQHxa_themeLabel",
+			"themeRow": "aIQHxa_themeRow",
+			"titleBadge": "aIQHxa_titleBadge"
 		};
 		//#endregion
 		//#region src/client/SkinCenter.tsx
@@ -663,39 +544,21 @@ window.__ModuleLoader__.load({
 			const [open, setOpen] = (0, react.useState)(false);
 			const [tryingId, setTryingId] = (0, react.useState)(null);
 			const [tryingOfficial, setTryingOfficial] = (0, react.useState)(false);
-			const [loadingId, setLoadingId] = (0, react.useState)(null);
 			const [applying, setApplying] = (0, react.useState)(null);
 			const [error, setError] = (0, react.useState)(null);
-			const mounted = (0, react.useRef)(false);
-			const tryOnRequest = (0, react.useRef)(0);
-			(0, react.useEffect)(() => {
-				mounted.current = true;
-				return () => {
-					mounted.current = false;
-				};
-			}, []);
 			const tryOn = (entry) => {
-				if (loadingId === entry.id) return;
-				const request = ++tryOnRequest.current;
 				setError(null);
-				setLoadingId(entry.id);
-				controller.tryOn(entry).then((mountedTarget) => {
-					if (!mounted.current || request !== tryOnRequest.current || !mountedTarget) return;
-					setLoadingId(null);
+				controller.tryOn(entry).then(() => {
 					setTryingId(entry.id);
 					setTryingOfficial(false);
 				}).catch(() => {
-					if (!mounted.current || request !== tryOnRequest.current) return;
-					setLoadingId(null);
 					setError(t("tryOnError"));
-					setTryingId(controller.trying?.id ?? null);
-					setTryingOfficial(controller.tryingOfficial);
+					setTryingId(null);
+					setTryingOfficial(false);
 				});
 			};
 			const tryOnOfficial = () => {
-				++tryOnRequest.current;
 				setError(null);
-				setLoadingId(null);
 				try {
 					controller.tryOnOfficial();
 				} catch {
@@ -707,9 +570,7 @@ window.__ModuleLoader__.load({
 				setTryingOfficial(true);
 			};
 			const exitTryOn = () => {
-				++tryOnRequest.current;
 				controller.exit();
-				setLoadingId(null);
 				setTryingId(null);
 				setTryingOfficial(false);
 			};
@@ -723,10 +584,6 @@ window.__ModuleLoader__.load({
 				const expected = target === OFFICIAL ? "none" : target;
 				let tries = 0;
 				const tick = () => {
-					if (!mounted.current) {
-						resolve(false);
-						return;
-					}
 					tries += 1;
 					fetch("/api/skin-center/state").then(async (response) => {
 						const payload = await response.json().catch(() => null);
@@ -734,43 +591,11 @@ window.__ModuleLoader__.load({
 							resolve(true);
 							return;
 						}
-						if (tries >= 20 || !mounted.current) resolve(false);
+						if (tries >= 20) resolve(false);
 						else window.setTimeout(tick, 250);
 					}).catch(() => {
-						if (tries >= 20 || !mounted.current) resolve(false);
+						if (tries >= 20) resolve(false);
 						else window.setTimeout(tick, 250);
-					});
-				};
-				tick();
-			});
-			/**
-			* Poll the served GUI document until the boot manifest actually enables
-			* the target (the config watcher regenerates it asynchronously after the
-			* patch write — reloading earlier boots the page into the previous skin),
-			* or time out.
-			* @param target - skin id, or `official` for the stock look.
-			* @returns whether the manifest caught up within the poll budget.
-			*/
-			const manifestReady = (target) => new Promise((resolve) => {
-				const expected = target === OFFICIAL ? null : target;
-				let tries = 0;
-				const tick = () => {
-					if (!mounted.current) {
-						resolve(false);
-						return;
-					}
-					tries += 1;
-					fetch(window.location.href, { cache: "no-store" }).then(async (response) => {
-						const html = await response.text().catch(() => null);
-						if (html !== null && manifestHasSkin(html, expected)) {
-							resolve(true);
-							return;
-						}
-						if (tries >= 40 || !mounted.current) resolve(false);
-						else window.setTimeout(tick, 500);
-					}).catch(() => {
-						if (tries >= 40 || !mounted.current) resolve(false);
-						else window.setTimeout(tick, 500);
 					});
 				};
 				tick();
@@ -778,9 +603,7 @@ window.__ModuleLoader__.load({
 			/**
 			* One-click apply: the host half runs `dsh-skin use <target>` (or
 			* `use official`), the config watcher hot-reloads the patch within
-			* seconds, then this page reloads to pick up the new boot graph. The
-			* reload waits for both the patch (state poll) and the regenerated boot
-			* manifest (manifest poll) so the page never boots into the old skin.
+			* seconds, then this page reloads to pick up the new boot graph.
 			* @param target - skin id, or `official` for the stock look.
 			*/
 			const applySkin = (target) => {
@@ -795,20 +618,11 @@ window.__ModuleLoader__.load({
 					if (!response.ok || payload?.ok !== true) throw new Error(payload?.error ?? `HTTP ${response.status}`);
 					setApplying(null);
 					confirmActive(target).then((confirmed) => {
-						if (!mounted.current) return;
-						if (!confirmed) {
+						if (confirmed) window.location.reload();
+						else {
 							const command = target === OFFICIAL ? "dsh-skin use official" : `dsh-skin use ${target}`;
 							setError(`${t("appliedUnconfirmed")} — ${command}`);
-							return;
 						}
-						manifestReady(target).then((ready) => {
-							if (!mounted.current) return;
-							if (ready) window.location.reload();
-							else {
-								const command = target === OFFICIAL ? "dsh-skin use official" : `dsh-skin use ${target}`;
-								setError(`${t("appliedUnconfirmed")} — ${command}`);
-							}
-						});
 					});
 				}).catch((cause) => {
 					setApplying(null);
@@ -816,6 +630,70 @@ window.__ModuleLoader__.load({
 					const command = target === OFFICIAL ? "dsh-skin use official" : `dsh-skin use ${target}`;
 					setError(`${t("applyFailed")} (${detail}) — ${command}`);
 				});
+			};
+			/**
+			* Custom background import: the hidden file input opens the native
+			* file dialog; the picked image is downscaled on a canvas (≤1920px,
+			* JPEG 0.88) and POSTed to the host, which generates + enables a skin.
+			* @param event - the file input change event.
+			*/
+			const pickImage = (event) => {
+				const input = event.target;
+				const file = input.files?.[0];
+				if (file === void 0) return;
+				input.value = "";
+				if (typeof file.type !== "string" || !file.type.startsWith("image/")) {
+					setError("仅支持图片文件（png / jpg / webp / gif）");
+					return;
+				}
+				if (file.size > 20 * 1024 * 1024) {
+					setError("图片超过 20MB，请先压缩再导入");
+					return;
+				}
+				setError(null);
+				setApplying("custom-image");
+				const objectUrl = URL.createObjectURL(file);
+				const img = new Image();
+				img.onload = () => {
+					try {
+						const maxSide = 1920;
+						const scale = Math.min(1, maxSide / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
+						const canvas = document.createElement("canvas");
+						canvas.width = Math.max(1, Math.round((img.naturalWidth || 1) * scale));
+						canvas.height = Math.max(1, Math.round((img.naturalHeight || 1) * scale));
+						const context = canvas.getContext("2d");
+						if (context === null) throw new Error("canvas-unavailable");
+						context.drawImage(img, 0, 0, canvas.width, canvas.height);
+						const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+						fetch("/api/skin-center/apply-image", {
+							method: "POST",
+							headers: { "content-type": "application/json" },
+							body: JSON.stringify({ image: dataUrl, name: (file.name.replace(/\.[^.]+$/, "") || "custom").slice(0, 40) })
+						}).then(async (response) => {
+							const payload = await response.json().catch(() => null);
+							if (!response.ok || payload?.ok !== true) throw new Error(payload?.error ?? `HTTP ${response.status}`);
+							setApplying(null);
+							confirmActive(payload.active).then((confirmed) => {
+								if (confirmed) window.location.reload();
+								else setError("已应用但未确认生效，请刷新页面");
+							});
+						}).catch((cause) => {
+							setApplying(null);
+							const detail = cause instanceof Error ? cause.message : String(cause);
+							setError(`应用失败（${detail}）`);
+						});
+					} catch (cause) {
+						URL.revokeObjectURL(objectUrl);
+						setApplying(null);
+						setError(`处理图片失败: ${cause instanceof Error ? cause.message : String(cause)}`);
+					}
+				};
+				img.onerror = () => {
+					URL.revokeObjectURL(objectUrl);
+					setApplying(null);
+					setError("无法读取该图片文件");
+				};
+				img.src = objectUrl;
 			};
 			const dark = snapshot.active.colorScheme === "dark";
 			/** One row: try-on control + apply button. Shared by the official card and every skin card. */
@@ -834,13 +712,12 @@ window.__ModuleLoader__.load({
 				}) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 					type: "button",
 					className: `${skin_center_module_css_default.button} ${skin_center_module_css_default.buttonPrimary}`,
-					disabled: loadingId === opts.key,
 					onClick: opts.onTryOn,
-					children: loadingId === opts.key ? t("loading") : t("tryOn")
+					children: t("tryOn")
 				}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 					type: "button",
 					className: skin_center_module_css_default.button,
-					disabled: applying !== null || loadingId !== null,
+					disabled: applying !== null,
 					onClick: () => {
 						applySkin(opts.key);
 					},
@@ -848,7 +725,7 @@ window.__ModuleLoader__.load({
 				})]
 			});
 			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("li", {
-				className: open ? `${skin_center_module_css_default.pluginCard} ${skin_center_module_css_default.pluginCardOpen}` : skin_center_module_css_default.pluginCard,
+				className: skin_center_module_css_default.pluginCard,
 				children: [/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("button", {
 					type: "button",
 					className: skin_center_module_css_default.cardHeader,
@@ -870,17 +747,9 @@ window.__ModuleLoader__.load({
 							title: t("cardDescription"),
 							children: t("cardDescription")
 						})]
-					}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("svg", {
-						width: "14",
-						height: "14",
-						viewBox: "0 0 14 14",
-						fill: "none",
-						xmlns: "http://www.w3.org/2000/svg",
-						className: open ? `${skin_center_module_css_default.chevron} ${skin_center_module_css_default.chevronOpen}` : skin_center_module_css_default.chevron,
-						children: /* @__PURE__ */ (0, react_jsx_runtime.jsx)("path", {
-							d: "M11.8486 5.5L11.4238 5.92383L8.69727 8.65137C8.44157 8.90706 8.21562 9.13382 8.01172 9.29785C7.79912 9.46883 7.55595 9.61756 7.25 9.66602C7.08435 9.69222 6.91565 9.69222 6.75 9.66602C6.44405 9.61756 6.20088 9.46883 5.98828 9.29785C5.78438 9.13382 5.55843 8.90706 5.30273 8.65137L2.57617 5.92383L2.15137 5.5L3 4.65137L3.42383 5.07617L6.15137 7.80273C6.42595 8.07732 6.59876 8.24849 6.74023 8.3623C6.87291 8.46904 6.92272 8.47813 6.9375 8.48047C6.97895 8.48703 7.02105 8.48703 7.0625 8.48047C7.07728 8.47813 7.12709 8.46904 7.25977 8.3623C7.40124 8.24849 7.57405 8.07732 7.84863 7.80273L10.5762 5.07617L11 4.65137L11.8486 5.5Z",
-							fill: "currentColor"
-						})
+					}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+						className: open ? skin_center_module_css_default.chevronOpen : skin_center_module_css_default.chevron,
+						children: "▾"
 					})]
 				}), open ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 					className: skin_center_module_css_default.cardBody,
@@ -948,6 +817,43 @@ window.__ModuleLoader__.load({
 								/* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 									className: backdropActive ? skin_center_module_css_default.backgroundHint : skin_center_module_css_default.backgroundHintMuted,
 									children: backdropActive ? t("backgroundHint") : t("backgroundHintInert")
+								})
+							]
+						}),
+						/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+							className: skin_center_module_css_default.backgroundRow,
+							children: [
+								/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+									className: skin_center_module_css_default.backgroundHead,
+									children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+										className: skin_center_module_css_default.backgroundLabel,
+										children: "自定义背景图"
+									}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+										className: skin_center_module_css_default.backgroundValue,
+										"aria-hidden": "true",
+										children: "PNG / JPG / WEBP"
+									})]
+								}),
+								/* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
+									id: "skin-center-image-file",
+									type: "file",
+									accept: "image/png,image/jpeg,image/webp,image/gif",
+									style: { display: "none" },
+									"aria-hidden": "true",
+									onChange: pickImage
+								}),
+								/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+									type: "button",
+									className: `${skin_center_module_css_default.button} ${skin_center_module_css_default.buttonPrimary}`,
+									disabled: applying !== null,
+									onClick: () => {
+										document.getElementById("skin-center-image-file")?.click();
+									},
+									children: applying === "custom-image" ? "应用中…" : "选择背景图…"
+								}),
+								/* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
+									className: skin_center_module_css_default.backgroundHint,
+									children: "点击弹出系统文件选择框，选图后自动生成皮肤并启用（超大图自动缩放至 ≤1920px）；刷新页面生效。"
 								})
 							]
 						}),
@@ -1117,7 +1023,6 @@ window.__ModuleLoader__.load({
 			active: "Active",
 			tryingOn: "Trying on",
 			tryOn: "Try on",
-			loading: "Loading…",
 			exitTryOn: "Exit try-on",
 			apply: "Apply",
 			applying: "Applying…",
@@ -1143,7 +1048,6 @@ window.__ModuleLoader__.load({
 			active: "当前激活",
 			tryingOn: "试穿中",
 			tryOn: "试穿",
-			loading: "加载中…",
 			exitTryOn: "退出试穿",
 			apply: "应用",
 			applying: "应用中…",

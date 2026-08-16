@@ -1,7 +1,7 @@
 import { installSettingsSection, settingsNamespace } from "@deepseek-ai/dsh-settings";
 import z from "schemastery";
-import { chmodSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, renameSync, rmSync, rmdirSync, statSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
-import { basename, dirname, join, resolve, sep } from "node:path";
+import { lstatSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameSync, rmdirSync, statSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 //#region src/skin-switch.ts
@@ -11,11 +11,10 @@ import { fileURLToPath } from "node:url";
 * `dsh-skin` binary on PATH (the bug zhu1090093659/dsh-web-ui#5: "dsh-skin
 * CLI not found on PATH").
 *
-* `use` owns the `dsh-skin managed` section of the harness-home
-* `cordis.patch.yml` (atomic rewrite, hot-reloaded by the DSH config watcher
-* within seconds, no restart) and the profile node_modules symlink that makes
-* the selected skin resolvable from the running profile. `current` reads the
-* active back.
+* `use` owns the `dsh-skin managed` section of `~/.dsh/cordis.patch.yml`
+* (atomic rewrite, hot-reloaded by the DSH config watcher within seconds,
+* no restart) and the profile node_modules symlink that makes the selected
+* skin resolvable from the web profile. `current` reads the active back.
 *
 * The behaviour/text is a 1:1 port of scripts/dsh-skin (`use`/`current`;
 * workspace assets live in packages/skins/<id>). The skin registry is
@@ -80,12 +79,8 @@ const SKINS_DIR = resolveSkinsDir();
 /** Managed patch-section delimiters (the CLI's SINGLE authority boundaries). */
 const MANAGED_START = "# --- dsh-skin managed (auto-generated; do not edit) ---";
 const MANAGED_END = "# --- end dsh-skin managed ---";
-/** Legal npm package name (scoped or unscoped). skin.json `package` is joined
-* into profile node_modules paths and rendered into YAML, so it must never
-* carry path separators, quotes, newlines, or leading dots. */
-const NPM_PACKAGE_NAME_RE = /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/;
-/** Legal cordis loader entry id for a skin insert row. */
-const WIRING_ID_RE = /^ui-skin-[a-z0-9-]+$/;
+/** The GUI profile this machine runs (dsh web); overridable via DSH_SKIN_PROFILE. */
+const DEFAULT_PROFILE = process.env.DSH_SKIN_PROFILE ?? "web";
 /**
 * Parse the switch-relevant fields of one skin.json. Returns null for
 * anything that is not a valid skin so it is simply skipped — never walking
@@ -98,10 +93,10 @@ function readSkinMeta(absDir) {
 		if (typeof meta !== "object" || meta === null) return null;
 		const record = meta;
 		if (typeof record.id !== "string" || !/^[a-z0-9-]+$/.test(record.id)) return null;
-		if (typeof record.package !== "string" || !NPM_PACKAGE_NAME_RE.test(record.package)) return null;
+		if (typeof record.package !== "string") return null;
 		const wiring = record.wiring;
 		const wiringRecord = typeof wiring === "object" && wiring !== null ? wiring : null;
-		if (wiringRecord === null || typeof wiringRecord.id !== "string" || !WIRING_ID_RE.test(wiringRecord.id)) return null;
+		if (wiringRecord === null || typeof wiringRecord.id !== "string") return null;
 		return {
 			id: record.id,
 			package: record.package,
@@ -195,9 +190,12 @@ function loadRegistry(skinsDir = SKINS_DIR) {
 }
 /**
 * The skins the bundle layer already wires (no insert row needed) — derived
-* from each skin.json wiring.bundleWired (the repo's static truth). Skins
-* wired by an installed per-skin bundle are detected dynamically per profile
-* by activeSkinIsBundleWired / registryWithProfileWiring.
+* from each skin.json wiring.bundleWired (the repo's static truth).
+*
+* TODO: the CLI also detects skins wired via the active profile's
+* dsh.profile.bundles (bundleWiredFromProfile). A skin installed from the
+* web profile's manifest is still represented by skin.json's flag in this
+* repo; wire further profile-based detection here if ever needed.
 * @param registry - the derived registry (or a partial override in tests).
 */
 function wiredNames(registry) {
@@ -223,14 +221,8 @@ function stripManaged(patch) {
 	const start = patch.indexOf(MANAGED_START);
 	if (start === -1) return patch;
 	const end = patch.indexOf(MANAGED_END, start);
-	if (end === -1) throw new Error("managed skin section is unterminated; fix the harness cordis.patch.yml");
+	if (end === -1) throw new Error("managed skin section is unterminated; fix ~/.dsh/cordis.patch.yml");
 	return patch.slice(0, start) + patch.slice(end + 30);
-}
-/** YAML single-quoted scalar: a literal single quote doubles. `wiring.id` is
-* already validated before it ever reaches a registry, so only `package`
-* needs escaping here. */
-function yamlSingleQuote(value) {
-	return `'${value.replace(/'/g, "''")}'`;
 }
 /**
 * Render the managed section for a target skin (null = official stock look:
@@ -246,7 +238,7 @@ function renderManaged(active, registry = loadRegistry()) {
 		if (name === active) continue;
 		lines.push(`- id: ${registry[name].id}`, "  disabled: true");
 	}
-	if (active !== null && !wired.has(active)) lines.push("- insert:", `    - id: ${registry[active].id}`, `      name: ${yamlSingleQuote(registry[active].pkg)}`);
+	if (active !== null && !wired.has(active)) lines.push("- insert:", `    - id: ${registry[active].id}`, `      name: '${registry[active].pkg}'`);
 	lines.push(MANAGED_END);
 	return lines.join("\n");
 }
@@ -269,240 +261,15 @@ function currentActive(patch, registry = loadRegistry()) {
 	return enabled.length ? enabled[enabled.length - 1].replace("ui-skin-", "") : null;
 }
 /**
-* Whether a cordis.patch.yml text contains an `insert:` list row for `id`
-* (the row a skin bundle would contribute, as opposed to a home-layer
-* `disabled: true` id-target row). The patch format is small and line-based;
-* a YAML parser dependency is not worth the weight for this one probe.
-* @param patch - raw patch text.
-* @param id - the loader entry id to look for.
-*/
-function patchHasInsertId(patch, id) {
-	let insertIndent = null;
-	for (const line of patch.split(/\r?\n/)) {
-		const trimmed = line.trimStart();
-		if (trimmed === "" || trimmed.startsWith("#")) continue;
-		const indent = line.length - trimmed.length;
-		if (/^- insert:\s*$/.exec(trimmed) !== null) {
-			insertIndent = indent;
-			continue;
-		}
-		if (insertIndent === null) continue;
-		if (indent <= insertIndent) {
-			insertIndent = null;
-			if (/^- insert:\s*$/.exec(trimmed) !== null) insertIndent = indent;
-			continue;
-		}
-		const row = /^- id:\s*['"]?([^'"]+)['"]?\s*$/.exec(trimmed);
-		if (row !== null && row[1] === id) return true;
-	}
-	return false;
-}
-/**
-* Bundle entries from the active profile manifest's `dsh.profile.bundles` —
-* the authoritative wiring source used by scripts/dsh-skin
-* (`bundleWiredFromProfile`, lines 68-75). Unreadable/malformed manifests
-* contribute nothing, matching the CLI's try/catch fallback.
-* @param profileManifestPath - `<harnessHome>/profiles/<profile>/package.json`.
-*/
-function readProfileBundles(profileManifestPath) {
-	const out = /* @__PURE__ */ new Set();
-	if (profileManifestPath === void 0) return out;
-	try {
-		const manifest = JSON.parse(readFileSync(profileManifestPath, "utf8"));
-		if (typeof manifest !== "object" || manifest === null) return out;
-		const dsh = manifest.dsh;
-		if (typeof dsh !== "object" || dsh === null) return out;
-		const profile = dsh.profile;
-		if (typeof profile !== "object" || profile === null) return out;
-		const bundles = profile.bundles;
-		if (!Array.isArray(bundles)) return out;
-		for (const bundle of bundles) if (typeof bundle === "string") out.add(bundle);
-	} catch {}
-	return out;
-}
-/**
-* Dependency keys from the active profile manifest's `dependencies` — the
-* profile top-level packages the loader reconciles patch rows from (the
-* second wiring channel beside dsh.profile.bundles; `dsh plugin add` and
-* npm installs land here). Unreadable/malformed manifests contribute
-* nothing, matching readProfileBundles.
-* @param profileManifestPath - <harnessHome>/profiles/<profile>/package.json.
-*/
-function readProfileDependencies(profileManifestPath) {
-	const out = /* @__PURE__ */ new Set();
-	if (profileManifestPath === void 0) return out;
-	try {
-		const manifest = JSON.parse(readFileSync(profileManifestPath, "utf8"));
-		if (typeof manifest !== "object" || manifest === null) return out;
-		const deps = manifest.dependencies;
-		if (typeof deps !== "object" || deps === null) return out;
-		for (const key of Object.keys(deps)) out.add(key);
-	} catch {}
-	return out;
-}
-/** Whether an absolute path sits inside the `dsh-skins/skins/` bundled
-* carrier (the path-segment heuristic documented on the symlink branch). */
-function isDshSkinsCarrierPath(dir) {
-	const parts = dir.split(sep);
-	return parts.includes("dsh-skins") && parts.includes("skins");
-}
-/**
-* Whether the active skin's loader entry is already provided by the skin
-* package's own bundle patch, so the home-layer managed section must NOT add
-* a duplicate insert row (issue #148: `duplicate loader entry id`).
-*
-* True when:
-*  - the registry marks the skin `bundleWired` (skin.json wiring flag), or
-*  - the active profile manifest's `dsh.profile.bundles` contains entry.pkg
-*    (the scripts/dsh-skin `bundleWiredFromProfile` authority — true whether
-*    the profile target is a real directory or a symlink), or
-*  - the profile manifest's `dependencies` contains entry.pkg (installed via
-*    `dsh plugin add` / npm — the loader reconciles patch rows of the
-*    profile's top-level packages, which is how these bundles get wired).
-*
-* When the profile manifest exists, its wiring lists are the whole truth:
-* the loader reconciles ONLY bundle entries and dependency packages. In
-* particular, the node_modules symlinks ensureSymlink creates for the
-* skin-center itself are pure resolvability links — they are never
-* reconciled — and must not be mistaken for installed bundles, otherwise
-* useSkin skips the home insert row and no skin ever activates.
-*
-* Only when the manifest is absent/unreadable does the function fall back to
-* the structural probe (a real installed dir, or a symlink to an independent
-* package outside the dsh-skins/skins carrier, whose own cordis.patch.yml
-* inserts entry.id). A symlink into the bundled carrier asset dir is never an
-* active per-skin bundle in any layout.
-* @param entry - the skin switch entry.
-* @param profileModulesDir - the profile's node_modules dir.
-* @param profileManifestPath - optional profile package.json path.
-*/
-function activeSkinIsBundleWired(entry, profileModulesDir, profileManifestPath) {
-	if (entry.bundleWired) return true;
-	if (readProfileBundles(profileManifestPath).has(entry.pkg)) return true;
-	if (readProfileDependencies(profileManifestPath).has(entry.pkg)) return true;
-	if (profileManifestPath !== void 0 && statSync(profileManifestPath, { throwIfNoEntry: false })) return false;
-	const target = join(profileModulesDir, entry.pkg);
-	let stat;
-	try {
-		stat = lstatSync(target, { throwIfNoEntry: false });
-	} catch {
-		return false;
-	}
-	if (stat === void 0 || !stat.isDirectory() && !stat.isSymbolicLink()) return false;
-	let probeDir = target;
-	if (stat.isSymbolicLink()) {
-		let real;
-		try {
-			real = realpathSync(target);
-		} catch {
-			return false;
-		}
-		let entryReal;
-		try {
-			entryReal = realpathSync(entry.dir);
-		} catch {
-			entryReal = entry.dir;
-		}
-		if (isDshSkinsCarrierPath(real) || real === entryReal && isDshSkinsCarrierPath(entryReal)) return false;
-		probeDir = real;
-	}
-	let patch;
-	try {
-		patch = readFileSync(join(probeDir, "cordis.patch.yml"), "utf8");
-	} catch {
-		return false;
-	}
-	return patchHasInsertId(patch, entry.id);
-}
-/**
-* Copy a registry with `bundleWired` enriched from the profile layout, so
-* patch rendering and active reading agree on skins whose insert row the
-* installed per-skin bundle provides.
-*/
-function registryWithProfileWiring(registry, profileModulesDir, profileManifestPath) {
-	const out = {};
-	for (const [name, entry] of Object.entries(registry)) out[name] = activeSkinIsBundleWired(entry, profileModulesDir, profileManifestPath) ? {
-		...entry,
-		bundleWired: true
-	} : entry;
-	return out;
-}
-/**
-* First non-blank string in a list of candidate values. Whitespace-only
-* values (including environment variables set to spaces) count as unset.
-*/
-function firstNonBlank(...values) {
-	for (const value of values) if (typeof value === "string") {
-		const trimmed = value.trim();
-		if (trimmed !== "") return trimmed;
-	}
-}
-/**
-* Resolve the DSH harness home exactly like the dsh launcher:
-*  - an injected `home` option (tests pass a throwaway HOME) maps to
-*    `<home>/.dsh`;
-*  - otherwise a trimmed non-empty `$DSH_HOME` is the harness home directly
-*    (dsh's `resolveDshHome()` contract — the env var already points at the
-*    `.dsh` directory, so no suffix is appended);
-*  - otherwise `homedir()/.dsh`.
-* @param optsHome - injectable HOME (tests); default resolves from env/homedir.
-* @param env - environment map (defaults to process.env).
-*/
-function resolveHarnessHome(optsHome, env = process.env) {
-	if (optsHome !== void 0) return join(optsHome, ".dsh");
-	return firstNonBlank(env.DSH_HOME) ?? join(homedir(), ".dsh");
-}
-/**
-* Resolve the profile the skin switch must operate against (the profile the
-* GUI is actually running in). Precedence, first non-blank wins:
-*   1. explicit opts.profile;
-*   2. `$DSH_SKIN_PROFILE`;
-*   3. `$DSH_PROFILE` (the generic dsh profile override);
-*   4. `process.cwd()` when it is a directory directly under
-*      `<harnessHome>/profiles/<name>` — return that `<name>`;
-*   5. `web`.
-* Pure and injectable so tests can exercise every precedence level without
-* mutating the process. `useSkin`/`currentSkin` call it with the same
-* harness-home-derived profiles root the path resolver uses.
-* @param optsProfile - explicit profile override.
-* @param env - environment map (defaults to process.env).
-* @param cwd - current working directory (defaults to process.cwd()).
-* @param profilesRoot - `<harnessHome>/profiles` dir (defaults to the root
-*   derived from env/homedir).
-*/
-function resolveProfile(optsProfile, env = process.env, cwd = process.cwd(), profilesRoot) {
-	const explicit = firstNonBlank(optsProfile, env.DSH_SKIN_PROFILE, env.DSH_PROFILE);
-	if (explicit !== void 0) return explicit;
-	const root = resolve(profilesRoot ?? join(resolveHarnessHome(void 0, env), "profiles"));
-	const normalizedCwd = resolve(cwd);
-	const canonicalDir = (p) => {
-		try {
-			return realpathSync(p);
-		} catch {
-			return resolve(p);
-		}
-	};
-	if (canonicalDir(dirname(normalizedCwd)) === canonicalDir(root)) {
-		const name = basename(normalizedCwd);
-		try {
-			if (name !== "" && statSync(normalizedCwd, { throwIfNoEntry: false })?.isDirectory() === true) return name;
-		} catch {}
-	}
-	return "web";
-}
-/**
 * Resolve the DSH paths under a HOME. home/profile are injectable so tests
 * can point at a throwaway HOME (mirrors scripts/dsh-skin.test.mjs).
-* @param home - home dir (defaults to $DSH_HOME or the process HOME).
-* @param profile - profile name (defaults via resolveProfile precedence).
+* @param home - home dir (defaults to the process HOME).
+* @param profile - profile name (defaults to DSH_SKIN_PROFILE or 'web').
 */
-function resolvePaths(home, profile) {
-	const harnessHome = resolveHarnessHome(home);
-	const activeProfile = resolveProfile(profile, process.env, process.cwd(), join(harnessHome, "profiles"));
+function resolvePaths(home = homedir(), profile = DEFAULT_PROFILE) {
 	return {
-		patchPath: join(harnessHome, "cordis.patch.yml"),
-		profileModulesDir: join(harnessHome, "profiles", activeProfile, "node_modules"),
-		profileManifestPath: join(harnessHome, "profiles", activeProfile, "package.json")
+		patchPath: join(home, ".dsh", "cordis.patch.yml"),
+		profileModulesDir: join(home, ".dsh", "profiles", profile, "node_modules")
 	};
 }
 function readPatch(patchPath) {
@@ -516,43 +283,15 @@ function readPatch(patchPath) {
 * Atomic replace: write a sibling temp file then rename over the target, so a
 * crash mid-write can never leave a half-written boot patch and the config
 * watcher only ever sees complete content (the CLI's own strategy). Creates
-* the parent dir if missing, preserves the target's existing permission bits,
-* uses a fresh mkdtemp directory (same dir as the target) so concurrent
-* writers can never preempt the same temp name, and always cleans the temp
-* directory on error.
+* the parent dir if missing.
 * @param filePath - target file.
 * @param next - full next content.
 */
 function writePatchAtomic(filePath, next) {
-	const dir = dirname(filePath);
-	mkdirSync(dir, { recursive: true });
-	let previousMode;
-	try {
-		previousMode = statSync(filePath).mode & 511;
-	} catch {
-		previousMode = void 0;
-	}
-	const tmpDir = mkdtempSync(join(dir, `${basename(filePath)}.tmp-`));
-	const tmp = join(tmpDir, basename(filePath));
-	try {
-		writeFileSync(tmp, next, { flag: "wx" });
-		chmodSync(tmp, previousMode ?? 384);
-		renameSync(tmp, filePath);
-	} catch (error) {
-		try {
-			rmSync(tmpDir, {
-				recursive: true,
-				force: true
-			});
-		} catch {}
-		throw error;
-	}
-	try {
-		rmSync(tmpDir, {
-			recursive: true,
-			force: true
-		});
-	} catch {}
+	mkdirSync(dirname(filePath), { recursive: true });
+	const tmp = `${filePath}.tmp-${process.pid}`;
+	writeFileSync(tmp, next);
+	renameSync(tmp, filePath);
 }
 /**
 * Make the profile node_modules link for a skin. Returns true when a new
@@ -696,7 +435,6 @@ function useSkin(name, opts = {}) {
 	const registry = opts.registry ?? loadRegistry();
 	if (!official && registry[name] === void 0) throw new Error(`unknown skin "${name}". Known: ${Object.keys(registry).join(", ")} (or "official" for the stock look)`);
 	const paths = resolvePaths(opts.home, opts.profile);
-	let renderRegistry = registry;
 	if (!official) {
 		const entry = registry[name];
 		symlinkFriendly(`switching to "${name}"`, () => {
@@ -704,9 +442,8 @@ function useSkin(name, opts = {}) {
 		});
 		const problem = checkResolvable(entry, paths.profileModulesDir);
 		if (problem !== null) throw new Error(problem);
-		renderRegistry = registryWithProfileWiring(registry, paths.profileModulesDir, paths.profileManifestPath);
 	}
-	const next = `${stripLegacySkinRows(stripManaged(readPatch(paths.patchPath))).replace(/\s+$/, "")}\n\n${renderManaged(official ? null : name, renderRegistry)}\n`;
+	const next = `${stripLegacySkinRows(stripManaged(readPatch(paths.patchPath))).replace(/\s+$/, "")}\n\n${renderManaged(official ? null : name, registry)}\n`;
 	writePatchAtomic(paths.patchPath, next);
 	return official ? "restored the official stock look — the config watcher applies it within seconds; refresh the page to see it." : `skin switched to "${name}" — the config watcher applies it within seconds; refresh the page (or the manifest re-fetches) to see it.`;
 }
@@ -721,7 +458,7 @@ function useSkin(name, opts = {}) {
 function currentSkin(patch, opts = {}) {
 	const paths = resolvePaths(opts.home, opts.profile);
 	const registry = opts.registry ?? loadRegistry();
-	return currentActive(patch ?? readPatch(paths.patchPath), registryWithProfileWiring(registry, paths.profileModulesDir, paths.profileManifestPath)) ?? "none";
+	return currentActive(patch ?? readPatch(paths.patchPath), registry) ?? "none";
 }
 //#endregion
 //#region src/routes.ts
@@ -792,14 +529,14 @@ function requireSameOrigin(req, res) {
 	});
 	return false;
 }
-/** Read a JSON request body (bounded). */
-function readJsonBody(req) {
+/** Read a JSON request body (bounded; default 64KB, image import raises it). */
+function readJsonBody(req, maxBytes = 64 * 1024) {
 	return new Promise((resolve, reject) => {
 		let size = 0;
 		const chunks = [];
 		req.on("data", (chunk) => {
 			size += chunk.length;
-			if (size > 64 * 1024) {
+			if (size > maxBytes) {
 				reject(/* @__PURE__ */ new Error("body-too-large"));
 				queueMicrotask(() => req.destroy());
 				return;
@@ -854,14 +591,14 @@ function getRoute(path, run) {
 	};
 }
 /** A POST JSON route wrapping one async call, fenced to same-origin requests. */
-function postRoute(path, run) {
+function postRoute(path, run, maxBytes = 64 * 1024) {
 	return {
 		kind: "exact",
 		path,
 		handler: (req, res) => {
 			if (!requireMethod(req, res, "POST")) return Promise.resolve();
 			if (!requireSameOrigin(req, res)) return Promise.resolve();
-			return readJsonBody(req).then((body) => {
+			return readJsonBody(req, maxBytes).then((body) => {
 				return run(typeof body === "object" && body !== null ? body : {}).then((value) => json(res, 200, value), (error) => {
 					json(res, 400, {
 						ok: false,
@@ -973,31 +710,192 @@ function bundleRoute() {
 	};
 }
 /**
+* Whether a skin dir is a bundled/official skin (protected from overwrite).
+* Bundled skins ship with the dsh-skins carrier: version 0.1.x and/or a
+* skin.json preview entry; user-imported skins are 0.0.1 with no preview.
+* @param dir - absolute skin package dir.
+*/
+function isBundledSkinDir(dir) {
+	try {
+		const pkg = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
+		if (typeof pkg.version === "string" && /^0\.1\./.test(pkg.version)) return true;
+	} catch {}
+	try {
+		const meta = JSON.parse(readFileSync(join(dir, "skin.json"), "utf8"));
+		if (meta !== null && typeof meta === "object" && meta.preview !== void 0) return true;
+	} catch {}
+	return false;
+}
+/**
+* Import a custom background image as a new skin and switch to it — the
+* browser half sends a downscaled data URL plus a display name; this side
+* generates the full skin package inside the bundled dsh-skins carrier
+* (the same files background-switcher's make-skin.mjs would write), then
+* reuses `useSkin` for the junction + managed-patch switch, so the result
+* is identical to a command-line import.
+* @param body - { image: "data:<mime>;base64,<b64>", name?, panelOpacity?, scrim? }.
+* @returns switch confirmation (same shape as /apply).
+*/
+async function importSkinFromImage(body) {
+	const image = typeof body.image === "string" ? body.image : "";
+	const match = /^data:(image\/(?:png|jpeg|webp|gif|svg\+xml));base64,([A-Za-z0-9+/=]+)$/.exec(image);
+	if (match === null) throw new Error("invalid-image: expected data:image/*;base64,<data>");
+	const mime = match[1];
+	const base64 = match[2];
+	const raw = Buffer.from(base64, "base64");
+	if (raw.length > 12 * 1024 * 1024) throw new Error("image-too-large: 图片超过 12MB，请先压缩");
+	const rawName = typeof body.name === "string" ? body.name.trim() : "";
+	let id = rawName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || `bg-${Date.now().toString(36)}`;
+	if (!/^[a-z0-9-]+$/.test(id)) throw new Error("invalid-skin-id");
+	const registry = loadRegistry();
+	// 同名处理：用户自定义皮肤（非内置）→ 原地覆盖更新，重新导入随心所欲；
+	// 撞上内置皮肤（受保护，不能毁掉）→ 自动派生唯一 id（如 miku-2）继续导入。
+	if (registry[id] !== void 0) {
+		if (isBundledSkinDir(registry[id].dir)) {
+			const base = id;
+			let n = 2;
+			while (registry[`${base}-${n}`] !== void 0) n += 1;
+			id = `${base}-${n}`;
+		}
+	}
+	const panelOpacity = clamp01(body.panelOpacity, 0.4);
+	const scrim = clamp01(body.scrim, 0.5);
+	const pkg = `@linxin666/dsh-client-ui-skin-${id}`;
+	const bodyAttr = `data-dsh-${id}`;
+	const datasetKey = "dsh" + id.split("-").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join("");
+	const dir = join(SKINS_DIR, "dsh-skins", "skins", id);
+	mkdirSync(join(dir, "lib"), { recursive: true });
+	writeFileSync(join(dir, "skin.json"), JSON.stringify({
+		id, name: rawName || id, nameEn: id, author: "skin-center", tagline: "自定义背景图",
+		description: "通过皮肤中心选择的背景图", tags: ["custom"], accent: "#2e9bff",
+		bodyAttr, package: pkg, wiring: { id: `ui-skin-${id}`, bundleWired: false }, order: 999
+	}, null, 2) + "\n");
+	writeFileSync(join(dir, "package.json"), JSON.stringify({
+		name: pkg, version: "0.0.1", description: "Custom background skin (skin-center import).",
+		type: "module", main: "lib/index.js",
+		exports: { ".": "./lib/index.js", "./client": "./lib/client.js", "./package.json": "./package.json" },
+		dsh: { bundle: { patch: "./cordis.patch.yml" }, client: { inject: [], platform: "web" } }, license: "MIT"
+	}, null, 2) + "\n");
+	writeFileSync(join(dir, "lib", "index.js"), `//#region src/index.ts\n/** Host loader entry for the browser-only skin plugin. */\nfunction apply() {}\n//#endregion\nexport { apply };\n`);
+	writeFileSync(join(dir, "lib", "client.js"), renderSkinClientJs({ id, pkg, bodyAttr, datasetKey, mime, base64, panelOpacity, scrim }));
+	writeFileSync(join(dir, "cordis.patch.yml"), `# ${id} skin bundle patch (skin-center import).\n- insert:\n    - id: ui-skin-${id}\n      name: '${pkg}'\n`);
+	return useSkin(id);
+}
+/** Clamp a numeric option to [0.05, 1] with a fallback. */
+function clamp01(value, fallback) {
+	return typeof value === "number" && Number.isFinite(value) ? Math.max(0.05, Math.min(1, value)) : fallback;
+}
+/** 8-digit #rrggbbaa from a hex color + alpha. */
+function hex8(hex, alpha) {
+	const a = Math.max(0, Math.min(1, alpha));
+	return hex + Math.round(a * 255).toString(16).padStart(2, "0");
+}
+/** Render the browser-side skin bundle: CSS + backdrop apply (mirrors make-skin.mjs). */
+function renderSkinClientJs(o) {
+	const { id, pkg, bodyAttr, datasetKey, mime, base64, panelOpacity, scrim } = o;
+	const P = (x) => Math.min(1, Math.max(0.05, x));
+	const T = (hex, a) => hex8(hex, a);
+	const lightTokens = [
+		`--dsw-alias-bg-base:${T("#ffffff", panelOpacity)}`,
+		`--dsw-alias-bg-layer-1:${T("#f3f5fb", P(panelOpacity + 0.05))}`,
+		`--dsw-alias-bg-layer-2:${T("#e9edf7", P(panelOpacity + 0.10))}`,
+		`--dsw-alias-bg-layer-3:${T("#dde3f1", P(panelOpacity + 0.13))}`,
+		`--dsw-alias-bg-module-platform:${T("#e9edf7", P(panelOpacity + 0.10))}`,
+		`--dsw-alias-bg-multi-select:${T("#dce3f7", P(panelOpacity + 0.25))}`,
+		`--dsw-alias-bg-overlay:${T("#eef1f9", P(panelOpacity + 0.37))}`,
+		`--dsw-alias-bg-skeleton:rgba(28,37,70,${(0.04 + scrim * 0.04).toFixed(2)})`,
+		`--dsw-specific-sidebar-fill:${T("#f2f5fa", P(panelOpacity + 0.05))}`,
+		`--dsw-specific-menu:${T("#f3f5fb", P(panelOpacity + 0.40))}`,
+		`--dsw-specific-selector:${T("#e4eaf7", P(panelOpacity + 0.30))}`,
+		`--dsw-specific-input-major:${T("#ffffff", P(panelOpacity + 0.05))}`,
+		`--dsw-specific-login-input:${T("#ffffff", P(panelOpacity + 0.05))}`,
+		`--dsw-specific-tip:${T("#f3f5fb", 1)}`,
+		`--dsw-specific-bubble:${T("#dce3f7", 1)}`,
+		`--dsw-specific-bubble-highlight:${T("#c3cfee", 1)}`
+	].join(";");
+	const darkTokens = [
+		`--dsw-alias-bg-base:${T("#10162a", panelOpacity)}`,
+		`--dsw-alias-bg-layer-1:${T("#1a2238", P(panelOpacity + 0.05))}`,
+		`--dsw-alias-bg-layer-2:${T("#202a44", P(panelOpacity + 0.10))}`,
+		`--dsw-alias-bg-layer-3:${T("#26324f", P(panelOpacity + 0.13))}`,
+		`--dsw-alias-bg-module-platform:${T("#202a44", P(panelOpacity + 0.10))}`,
+		`--dsw-alias-bg-multi-select:${T("#2c3765", P(panelOpacity + 0.25))}`,
+		`--dsw-alias-bg-overlay:${T("#1a2238", P(panelOpacity + 0.37))}`,
+		`--dsw-alias-bg-skeleton:rgba(255,255,255,${(0.04 + scrim * 0.04).toFixed(2)})`,
+		`--dsw-specific-sidebar-fill:${T("#1d2539", P(panelOpacity + 0.05))}`,
+		`--dsw-specific-menu:${T("#1a2238", P(panelOpacity + 0.40))}`,
+		`--dsw-specific-selector:${T("#1e2740", P(panelOpacity + 0.30))}`,
+		`--dsw-specific-input-major:${T("#1a2238", P(panelOpacity + 0.05))}`,
+		`--dsw-specific-login-input:${T("#1a2238", P(panelOpacity + 0.05))}`,
+		`--dsw-specific-tip:${T("#1a2238", 1)}`,
+		`--dsw-specific-bubble:${T("#2c3765", 1)}`,
+		`--dsw-specific-bubble-highlight:${T("#33417a", 1)}`
+	].join(";");
+	const css = [
+		`body[${bodyAttr}]{background-color:#f4f7fb;color:#1d2f52}`,
+		`body[${bodyAttr}][data-ds-dark-theme]{background-color:#0b1220;color:#c2d4f0}`,
+		`body[${bodyAttr}]{${lightTokens}}`,
+		`body[${bodyAttr}][data-ds-dark-theme]{${darkTokens}}`
+	].join("");
+	const scLight = (0.06 + scrim * 0.10).toFixed(3);
+	const scLight2 = (0.10 + scrim * 0.16).toFixed(3);
+	const scDark = (0.18 + scrim * 0.30).toFixed(3);
+	const scDark2 = (0.32 + scrim * 0.40).toFixed(3);
+	const dataUrl = `data:${mime};base64,${base64}`;
+	return `window.__ModuleLoader__.load({
+\tid: ${JSON.stringify(pkg)},
+\tfactory: (require) => {
+\t\tvar module = { exports: {} };
+\t\tvar exports = module.exports;
+\t\tconst css = ${JSON.stringify(css)};
+\t\tconst tagId = ${JSON.stringify(pkg + "/skin.css")};
+\t\tif (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
+\t\t\tconst tag = document.createElement("style");
+\t\t\ttag.dataset.plugin = ${JSON.stringify(pkg)};
+\t\t\ttag.dataset.pluginCss = tagId;
+\t\t\ttag.textContent = css;
+\t\t\tdocument.head.appendChild(tag);
+\t\t}
+\t\tconst BACKDROP = ${JSON.stringify(dataUrl)};
+\t\tconst SCRIM_LIGHT = "linear-gradient(rgba(255,255,255,${scLight}) 0%, rgba(255,255,255,${scLight2}) 100%)";
+\t\tconst SCRIM_DARK = "linear-gradient(rgba(4,8,20,${scDark}) 0%, rgba(4,8,20,${scDark2}) 100%)";
+\t\tconst BACKDROP_PROPERTIES = ["background-image", "background-position", "background-size", "background-attachment", "background-repeat"];
+\t\tfunction apply(ctx) {
+\t\t\tconst body = document.body;
+\t\t\tconst previous = new Map();
+\t\t\tfor (const prop of BACKDROP_PROPERTIES) previous.set(prop, body.style.getPropertyValue(prop));
+\t\t\tbody.dataset.${datasetKey} = "";
+\t\t\tconst setBackdrop = () => {
+\t\t\t\tconst dark = body.dataset.dsDarkTheme !== void 0;
+\t\t\t\tbody.style.setProperty("background-image", dark ? SCRIM_DARK + ", url(" + BACKDROP + ")" : SCRIM_LIGHT + ", url(" + BACKDROP + ")");
+\t\t\t\tbody.style.setProperty("background-position", "center");
+\t\t\t\tbody.style.setProperty("background-size", "cover");
+\t\t\t\tbody.style.setProperty("background-attachment", "fixed");
+\t\t\t\tbody.style.setProperty("background-repeat", "no-repeat");
+\t\t\t};
+\t\t\tsetBackdrop();
+\t\t\tconst observer = new MutationObserver(setBackdrop);
+\t\t\tobserver.observe(body, { attributes: true, attributeFilter: ["data-ds-dark-theme"] });
+\t\t\tctx.effect(() => () => {
+\t\t\t\tdelete body.dataset.${datasetKey};
+\t\t\t\tobserver.disconnect();
+\t\t\t\tfor (const [prop, value] of previous) body.style.setProperty(prop, value);
+\t\t\t}, ${JSON.stringify("ui-skin-" + id + ": backdrop")});
+\t\t}
+\t\texports.apply = apply;
+\t\treturn module.exports;
+\t}
+});
+`;
+}
+
+/**
 * Build the skin-center route family.
 * @param deps - optional runner override (tests).
 */
 function makeSkinCenterRoutes(deps = {}) {
 	const run = deps.run ?? runDshSkin;
-	const currentCacheTtlMs = 750;
-	let currentCache = null;
-	const current = () => {
-		const paths = resolvePaths();
-		const key = `${paths.patchPath}|${paths.profileManifestPath}`;
-		const now = Date.now();
-		if (currentCache !== null && currentCache.key === key && now - currentCache.at < currentCacheTtlMs) return Promise.resolve(currentCache.value);
-		return run(["current"]).then((out) => {
-			const value = out.trim() || "none";
-			currentCache = {
-				key,
-				value,
-				at: Date.now()
-			};
-			return value;
-		});
-	};
-	const invalidateCurrent = () => {
-		currentCache = null;
-	};
+	const current = () => run(["current"]).then((out) => out.trim() || "none");
 	return [
 		getRoute(`${SKIN_CENTER_API_PREFIX}/state`, async () => ({
 			ok: true,
@@ -1011,13 +909,20 @@ function makeSkinCenterRoutes(deps = {}) {
 				if (skin !== void 0) throw new Error("invalid-skin: skin and official are mutually exclusive");
 			} else if (typeof skin !== "string" || skin === "") throw new Error("invalid-skin: pass a skin name or official: true");
 			const out = await run(["use", official ? "official" : skin]);
-			invalidateCurrent();
 			return {
 				ok: true,
 				active: await current(),
 				message: out.trim()
 			};
-		})
+		}),
+		postRoute(`${SKIN_CENTER_API_PREFIX}/apply-image`, async (body) => {
+			const out = await importSkinFromImage(body);
+			return {
+				ok: true,
+				active: await current(),
+				message: out.trim()
+			};
+		}, 16 * 1024 * 1024)
 	];
 }
 //#endregion
