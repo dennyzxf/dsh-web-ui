@@ -6,7 +6,22 @@
 
 dsh-web-ui 是 DeepSeek Harness（DSH）Web UI 的插件与皮肤集合：任务看板、Git 图谱、右侧面板、移动端远程、远程连接、图像理解工具、鲸鱼娘宠物、实时令牌统计，以及皮肤中心。所有插件既可独立安装，也可通过聚合包一次装齐。
 
-> **本仓库增强（fork）**：在官方 dsh-web-ui 基础上新增「背景图片调节」——选择任意图片作为界面背景，浮动调节窗内实时调整明暗、面板不透明度与遮罩强度，一键保存、跨刷新保持；皮肤中心设置中的开关随时显示 / 隐藏调节窗。详见下方 [背景图片调节](#背景图片调节) 一节。
+> <span style="text-decoration:underline;text-decoration-color:#e11d48;">**本仓库增强（fork）**：在官方 dsh-web-ui 基础上新增「背景图片调节」——选择任意图片作为界面背景，浮动调节窗内实时调整明暗、面板不透明度与遮罩强度，一键保存、跨刷新保持；皮肤中心设置中的开关随时显示 / 隐藏调节窗。</span>
+
+### 背景图片调节
+
+选择一张图片作为界面背景，并在浮动调节窗里实时微调最终效果：
+
+- **上传背景图**：从任意目录选择图片（推荐 1920×1080 或 16:9），自动压缩后应用为背景，无需重启；
+- **实时调节**：浮动窗内可切换亮 / 暗主题、调节面板不透明度与背景遮罩强度，改动即时呈现；
+- **保存与恢复**：调节结果一键保存、跨刷新保持，也可随时恢复到之前保存的设置；
+- **随时开关**：皮肤中心设置中的「图片背景调节」开关控制浮动窗显示 / 隐藏（绿色开启、灰色关闭）。
+
+![背景图片调节开关](docs/screenshots/Image-background-tuner/cn/cn-01.png)
+
+![背景调节浮动窗](docs/screenshots/Image-background-tuner/cn/cn-02.png)
+
+![选择背景图片](docs/screenshots/Image-background-tuner/cn/cn-03.png)
 
 ![DSH Web UI 主界面](docs/screenshots/13-hero-main.png)
 
@@ -91,21 +106,6 @@ dsh-web-ui 是 DeepSeek Harness（DSH）Web UI 的插件与皮肤集合：任务
 皮肤中心提供 10 款皮肤，均支持先试穿再应用：试穿即时生效、退出完全还原，确认满意后一键应用。
 
 ![皮肤中心](docs/screenshots/03-settings-skin-center.png)
-
-### 背景图片调节
-
-选择一张图片作为界面背景，并在浮动调节窗里实时微调最终效果：
-
-- **上传背景图**：从任意目录选择图片（推荐 1920×1080 或 16:9），自动压缩后应用为背景，无需重启；
-- **实时调节**：浮动窗内可切换亮 / 暗主题、调节面板不透明度与背景遮罩强度，改动即时呈现；
-- **保存与恢复**：调节结果一键保存、跨刷新保持，也可随时恢复到之前保存的设置；
-- **随时开关**：皮肤中心设置中的「图片背景调节」开关控制浮动窗显示 / 隐藏（绿色开启、灰色关闭）。
-
-![背景图片调节开关](docs/screenshots/Image-background-tuner/cn/cn-01.png)
-
-![背景调节浮动窗](docs/screenshots/Image-background-tuner/cn/cn-02.png)
-
-![选择背景图片](docs/screenshots/Image-background-tuner/cn/cn-03.png)
 
 ### Windows XP（Luna）
 

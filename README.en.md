@@ -6,7 +6,22 @@
 
 dsh-web-ui is a collection of plugins and skins for the DeepSeek Harness (DSH) Web UI: a task board, a Git graph, the right panel, mobile remote control, remote connection, a whale-girl pet, live token statistics, and the Skin Center. Every plugin can be installed individually, or all at once through the aggregate packages.
 
-> **This fork adds**: an "Image Background Tuner" on top of the official dsh-web-ui — pick any image as your interface background, then fine-tune the theme, panel opacity and scrim strength live from a floating panel, save with one click and keep it across reloads; an in-settings switch shows / hides the panel anytime. See [Image Background Tuner](#image-background-tuner) below.
+> <span style="text-decoration:underline;text-decoration-color:#e11d48;">**This fork adds**: an "Image Background Tuner" on top of the official dsh-web-ui — pick any image as your interface background, then fine-tune the theme, panel opacity and scrim strength live from a floating panel, save with one click and keep it across reloads; an in-settings switch shows / hides the panel anytime.</span>
+
+### Image Background Tuner
+
+Pick an image as your interface background and fine-tune the final look live from a floating panel:
+
+- **Upload a background**: choose an image from any folder (1920×1080 or 16:9 is recommended), auto-compressed and applied as the background without a restart;
+- **Live tuning**: switch light / dark theme, adjust panel opacity and background scrim strength from the floating panel — changes render instantly;
+- **Save & restore**: persist the tuned result with one click (it survives reloads), or restore the previously saved settings anytime;
+- **On/off switch**: the "Image background tuner" switch in the skin-center settings shows / hides the floating panel (green = on, grey = off).
+
+![Image background tuner switch](docs/screenshots/Image-background-tuner/en/en-01.png)
+
+![Background tuner floating panel](docs/screenshots/Image-background-tuner/en/en-02.png)
+
+![Pick a background image](docs/screenshots/Image-background-tuner/en/en-03.png)
 
 ![DSH Web UI main screen](docs/screenshots/13-hero-main.png)
 
@@ -89,21 +104,6 @@ All family plugins' toggles and parameters live under "Settings > Plugin config"
 The skin center ships ten skins, each supporting try-on before applying: preview applies instantly and reverts fully on exit; once you are satisfied, apply it with one click.
 
 ![Skin center](docs/screenshots/03-settings-skin-center.png)
-
-### Image Background Tuner
-
-Pick an image as your interface background and fine-tune the final look live from a floating panel:
-
-- **Upload a background**: choose an image from any folder (1920×1080 or 16:9 is recommended), auto-compressed and applied as the background without a restart;
-- **Live tuning**: switch light / dark theme, adjust panel opacity and background scrim strength from the floating panel — changes render instantly;
-- **Save & restore**: persist the tuned result with one click (it survives reloads), or restore the previously saved settings anytime;
-- **On/off switch**: the "Image background tuner" switch in the skin-center settings shows / hides the floating panel (green = on, grey = off).
-
-![Image background tuner switch](docs/screenshots/Image-background-tuner/en/en-01.png)
-
-![Background tuner floating panel](docs/screenshots/Image-background-tuner/en/en-02.png)
-
-![Pick a background image](docs/screenshots/Image-background-tuner/en/en-03.png)
 
 ### Windows XP (Luna)
 
