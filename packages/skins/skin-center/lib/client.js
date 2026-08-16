@@ -546,6 +546,18 @@ window.__ModuleLoader__.load({
 			const [tryingOfficial, setTryingOfficial] = (0, react.useState)(false);
 			const [applying, setApplying] = (0, react.useState)(null);
 			const [error, setError] = (0, react.useState)(null);
+			// Image-background tuner switch: persisted, controls the floating bar.
+			const [tunerOn, setTunerOn] = (0, react.useState)(() => {
+				try { return localStorage.getItem(TUNER_ENABLED_KEY) !== "0"; } catch { return true; }
+			});
+			const toggleTuner = () => {
+				setTunerOn((current) => {
+					const next = !current;
+					try { localStorage.setItem(TUNER_ENABLED_KEY, next ? "1" : "0"); } catch {}
+					window.dispatchEvent(new CustomEvent(TUNER_TOGGLE_EVENT, { detail: { enabled: next } }));
+					return next;
+				});
+			};
 			const tryOn = (entry) => {
 				setError(null);
 				controller.tryOn(entry).then(() => {
@@ -630,70 +642,6 @@ window.__ModuleLoader__.load({
 					const command = target === OFFICIAL ? "dsh-skin use official" : `dsh-skin use ${target}`;
 					setError(`${t("applyFailed")} (${detail}) — ${command}`);
 				});
-			};
-			/**
-			* Custom background import: the hidden file input opens the native
-			* file dialog; the picked image is downscaled on a canvas (≤1920px,
-			* JPEG 0.88) and POSTed to the host, which generates + enables a skin.
-			* @param event - the file input change event.
-			*/
-			const pickImage = (event) => {
-				const input = event.target;
-				const file = input.files?.[0];
-				if (file === void 0) return;
-				input.value = "";
-				if (typeof file.type !== "string" || !file.type.startsWith("image/")) {
-					setError("仅支持图片文件（png / jpg / webp / gif）");
-					return;
-				}
-				if (file.size > 20 * 1024 * 1024) {
-					setError("图片超过 20MB，请先压缩再导入");
-					return;
-				}
-				setError(null);
-				setApplying("custom-image");
-				const objectUrl = URL.createObjectURL(file);
-				const img = new Image();
-				img.onload = () => {
-					try {
-						const maxSide = 1920;
-						const scale = Math.min(1, maxSide / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
-						const canvas = document.createElement("canvas");
-						canvas.width = Math.max(1, Math.round((img.naturalWidth || 1) * scale));
-						canvas.height = Math.max(1, Math.round((img.naturalHeight || 1) * scale));
-						const context = canvas.getContext("2d");
-						if (context === null) throw new Error("canvas-unavailable");
-						context.drawImage(img, 0, 0, canvas.width, canvas.height);
-						const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
-						fetch("/api/skin-center/apply-image", {
-							method: "POST",
-							headers: { "content-type": "application/json" },
-							body: JSON.stringify({ image: dataUrl, name: (file.name.replace(/\.[^.]+$/, "") || "custom").slice(0, 40) })
-						}).then(async (response) => {
-							const payload = await response.json().catch(() => null);
-							if (!response.ok || payload?.ok !== true) throw new Error(payload?.error ?? `HTTP ${response.status}`);
-							setApplying(null);
-							confirmActive(payload.active).then((confirmed) => {
-								if (confirmed) window.location.reload();
-								else setError("已应用但未确认生效，请刷新页面");
-							});
-						}).catch((cause) => {
-							setApplying(null);
-							const detail = cause instanceof Error ? cause.message : String(cause);
-							setError(`应用失败（${detail}）`);
-						});
-					} catch (cause) {
-						URL.revokeObjectURL(objectUrl);
-						setApplying(null);
-						setError(`处理图片失败: ${cause instanceof Error ? cause.message : String(cause)}`);
-					}
-				};
-				img.onerror = () => {
-					URL.revokeObjectURL(objectUrl);
-					setApplying(null);
-					setError("无法读取该图片文件");
-				};
-				img.src = objectUrl;
 			};
 			const dark = snapshot.active.colorScheme === "dark";
 			/** One row: try-on control + apply button. Shared by the official card and every skin card. */
@@ -791,6 +739,46 @@ window.__ModuleLoader__.load({
 							children: [
 								/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 									className: skin_center_module_css_default.backgroundHead,
+									children: [
+										/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+											className: skin_center_module_css_default.backgroundLabel,
+											children: t("tunerEnabled")
+										}),
+										/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+											type: "button",
+											onClick: toggleTuner,
+											"aria-pressed": tunerOn,
+											"aria-label": t("tunerEnabled"),
+											style: {
+												width: "22px",
+												height: "22px",
+												border: "none",
+												borderRadius: "50%",
+												cursor: "pointer",
+												background: tunerOn ? "#22c55e" : "#9ca3af",
+												boxShadow: "inset 0 1px 2px rgba(0,0,0,.25)",
+												padding: "0"
+											},
+											children: /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+												style: {
+													display: "block",
+													margin: "4px auto",
+													width: "10px",
+													height: "10px",
+													borderRadius: "50%",
+													background: tunerOn ? "#fff" : "#d1d5db"
+												}
+											})
+										})
+									]
+								})
+							]
+						}),
+						/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+							className: skin_center_module_css_default.backgroundRow,
+							children: [
+								/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+									className: skin_center_module_css_default.backgroundHead,
 									children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 										className: skin_center_module_css_default.backgroundLabel,
 										children: t("backgroundOpacity")
@@ -817,43 +805,6 @@ window.__ModuleLoader__.load({
 								/* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 									className: backdropActive ? skin_center_module_css_default.backgroundHint : skin_center_module_css_default.backgroundHintMuted,
 									children: backdropActive ? t("backgroundHint") : t("backgroundHintInert")
-								})
-							]
-						}),
-						/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
-							className: skin_center_module_css_default.backgroundRow,
-							children: [
-								/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
-									className: skin_center_module_css_default.backgroundHead,
-									children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
-										className: skin_center_module_css_default.backgroundLabel,
-										children: "自定义背景图"
-									}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
-										className: skin_center_module_css_default.backgroundValue,
-										"aria-hidden": "true",
-										children: "PNG / JPG / WEBP"
-									})]
-								}),
-								/* @__PURE__ */ (0, react_jsx_runtime.jsx)("input", {
-									id: "skin-center-image-file",
-									type: "file",
-									accept: "image/png,image/jpeg,image/webp,image/gif",
-									style: { display: "none" },
-									"aria-hidden": "true",
-									onChange: pickImage
-								}),
-								/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
-									type: "button",
-									className: `${skin_center_module_css_default.button} ${skin_center_module_css_default.buttonPrimary}`,
-									disabled: applying !== null,
-									onClick: () => {
-										document.getElementById("skin-center-image-file")?.click();
-									},
-									children: applying === "custom-image" ? "应用中…" : "选择背景图…"
-								}),
-								/* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
-									className: skin_center_module_css_default.backgroundHint,
-									children: "点击弹出系统文件选择框，选图后自动生成皮肤并启用（超大图自动缩放至 ≤1920px）；刷新页面生效。"
 								})
 							]
 						}),
@@ -952,6 +903,12 @@ window.__ModuleLoader__.load({
 			});
 		}
 		//#endregion
+		//#region extensions: floating background tuner constants
+		/** localStorage key for the image-background tuner switch (on/off). */
+		const TUNER_ENABLED_KEY = "dsh.skinTuner.enabled";
+		/** Window event fired when the tuner switch flips (the floating bar listens). */
+		const TUNER_TOGGLE_EVENT = "dsh-skin-tuner-toggle";
+		//#endregion
 		//#region src/client/background.ts
 		/** The namespace string the Host registers (mirrors src/index.ts). */
 		const SKIN_BACKGROUND_NS = "skin-background";
@@ -1035,7 +992,34 @@ window.__ModuleLoader__.load({
 			tryOnError: "Try-on failed — see console",
 			backgroundOpacity: "Background occlusion",
 			backgroundHint: "Instantly veils the backdrop behind the panels — higher values obscure the art to help you focus.",
-			backgroundHintInert: "Only applies to skins that paint a backdrop (Blue Fantasy / Whale Song). Applies to the official default automatically once such a skin is active."
+			backgroundHintInert: "Only applies to skins that paint a backdrop (Blue Fantasy / Whale Song). Applies to the official default automatically once such a skin is active.",
+			tunerTitle: "Background Tuner",
+			tunerDragHint: "Drag the title to move",
+			tunerLangLabel: "Language",
+			tunerEnabled: "Image background tuner",
+			tunerExpand: "Expand",
+			tunerCollapse: "Collapse",
+			tunerUpload: "Upload background",
+			tunerImageTip: "Image requirements",
+			tunerImageTipText: "A 1920*1080 image (16:9) is best. Under 2M is recommended — larger images load slower. Use an English file name without special characters like \"-\" or \"_\", otherwise the system may fail to recognize or load it.",
+			tunerTheme: "Theme",
+			tunerThemeLight: "Light",
+			tunerThemeDark: "Dark",
+			tunerPanelOpacity: "Panel opacity",
+			tunerScrim: "Scrim",
+			tunerSave: "Save",
+			tunerSaved: "Saved",
+			tunerReset: "Reset",
+			tunerRestored: "Restored",
+			tunerResetDone: "Reset",
+			tunerUploading: "Uploading…",
+			tunerAppliedRefresh: "Applied, refreshing…",
+			tunerAppliedUnconfirmed: "Applied but unconfirmed — please refresh the page",
+			tunerUploadFailed: "Upload failed",
+			tunerImageOnly: "Images only",
+			tunerTooLarge: "Image exceeds 20MB",
+			tunerProcessFailed: "Failed to process image",
+			tunerReadFailed: "Cannot read this image file"
 		};
 		const zh = {
 			title: "皮肤中心",
@@ -1060,8 +1044,719 @@ window.__ModuleLoader__.load({
 			tryOnError: "试穿失败，详见控制台",
 			backgroundOpacity: "背景遮挡",
 			backgroundHint: "即时为面板背后的背景加遮罩——数值越高越能弱化插画，帮你集中注意力。",
-			backgroundHintInert: "仅对带背景图插画的皮肤（蓝色幻想 / 鲸吟）生效；官方默认无背景图，该滑块对这些皮肤自动生效。"
+			backgroundHintInert: "仅对带背景图插画的皮肤（蓝色幻想 / 鲸吟）生效；官方默认无背景图，该滑块对这些皮肤自动生效。",
+			tunerTitle: "背景调节",
+			tunerDragHint: "拖动标题移动",
+			tunerLangLabel: "语言选择",
+			tunerEnabled: "图片背景调节",
+			tunerExpand: "展开",
+			tunerCollapse: "收起",
+			tunerUpload: "上传背景图",
+			tunerImageTip: "图片要求",
+			tunerImageTipText: "背景图要求 1920*1080 最合适，或者按 (16:9) 比例也可。大小 2M 以内最合适，图片越大加载越慢。图片名称最好用英文，且不要出现特殊符号，例如 \"-\"、\"_\"，否则系统可能认不到、加载不了。",
+			tunerTheme: "明暗选择",
+			tunerThemeLight: "亮色",
+			tunerThemeDark: "暗色",
+			tunerPanelOpacity: "面板不透明度",
+			tunerScrim: "遮罩强度",
+			tunerSave: "保存",
+			tunerSaved: "已保存",
+			tunerReset: "重置",
+			tunerRestored: "已恢复",
+			tunerResetDone: "已重置",
+			tunerUploading: "上传中…",
+			tunerAppliedRefresh: "已应用，刷新中…",
+			tunerAppliedUnconfirmed: "已应用但未确认，请刷新页面",
+			tunerUploadFailed: "上传失败",
+			tunerImageOnly: "仅支持图片文件",
+			tunerTooLarge: "图片超过 20MB",
+			tunerProcessFailed: "处理图片失败",
+			tunerReadFailed: "无法读取该图片文件"
 		};
+		//#endregion
+		//#region extensions: floating background tuner
+		/**
+		* Floating background tuner for custom background skins (those created
+		* by the "pick background image" flow). Pinned to the top-right corner
+		* when a custom skin is active; the theme toggle comes first, then the
+		* panel opacity and scrim sliders. Every change rewrites the skin's
+		* --dsw-alias-bg-* / --dsw-specific-* tokens and the backdrop gradient
+		* live (inline styles outrank the skin stylesheet), and persists per
+		* skin id in localStorage so the look survives reloads.
+		*/
+		const TUNER_STORE_KEY = "dsh.skinTuner.v1";
+		const TUNER_COLLAPSE_KEY = "dsh.skinTuner.collapsed.";
+		const TUNER_POS_KEY = "dsh.skinTuner.pos.";
+		const TUNER_LANG_KEY = "dsh.skinTuner.lang";
+		/** The tuner's own language preference ('en' | 'zh'), independent of the system. */
+		function tunerLang() {
+			try {
+				const saved = localStorage.getItem(TUNER_LANG_KEY);
+				return saved === "zh" ? "zh" : "en";
+			} catch {}
+			return "en";
+		}
+		/** Set and persist the tuner's language preference. */
+		function tunerSetLang(lang) {
+			try { localStorage.setItem(TUNER_LANG_KEY, lang === "zh" ? "zh" : "en"); } catch {}
+		}
+		/**
+		* Tuner copy lookup: picks the dictionary from the tuner's own language
+		* preference at call time (independent of the system locale), so the
+		* floating bar re-translates live when its in-panel language toggle
+		* flips. Defaults to English.
+		* @param key - a tuner* copy key from the bundle dictionaries.
+		* @returns the localized string for the tuner's current language.
+		*/
+		function tunerT(key) {
+			const dict = tunerLang() === "en" ? en : zh;
+			return dict[key] ?? key;
+		}
+		const TUNER_OFFICIAL_ATTRS = new Set(SKIN_CENTER_ENTRIES.map((e) => e.bodyAttr));
+		/** Light-theme token base colors, keyed by CSS variable name. */
+		const TUNER_LIGHT_BASE = {
+			"--dsw-alias-bg-base": "#ffffff",
+			"--dsw-alias-bg-layer-1": "#f3f5fb",
+			"--dsw-alias-bg-layer-2": "#e9edf7",
+			"--dsw-alias-bg-layer-3": "#dde3f1",
+			"--dsw-alias-bg-module-platform": "#e9edf7",
+			"--dsw-alias-bg-multi-select": "#dce3f7",
+			"--dsw-alias-bg-overlay": "#eef1f9",
+			"--dsw-specific-sidebar-fill": "#f2f5fa",
+			"--dsw-specific-menu": "#f3f5fb",
+			"--dsw-specific-selector": "#e4eaf7",
+			"--dsw-specific-input-major": "#ffffff",
+			"--dsw-specific-login-input": "#ffffff",
+			"--dsw-specific-tip": "#f3f5fb",
+			"--dsw-specific-bubble": "#dce3f7",
+			"--dsw-specific-bubble-highlight": "#c3cfee"
+		};
+		/** Dark-theme token base colors, keyed by CSS variable name. */
+		const TUNER_DARK_BASE = {
+			"--dsw-alias-bg-base": "#10162a",
+			"--dsw-alias-bg-layer-1": "#1a2238",
+			"--dsw-alias-bg-layer-2": "#202a44",
+			"--dsw-alias-bg-layer-3": "#26324f",
+			"--dsw-alias-bg-module-platform": "#202a44",
+			"--dsw-alias-bg-multi-select": "#2c3765",
+			"--dsw-alias-bg-overlay": "#1a2238",
+			"--dsw-specific-sidebar-fill": "#1d2539",
+			"--dsw-specific-menu": "#1a2238",
+			"--dsw-specific-selector": "#1e2740",
+			"--dsw-specific-input-major": "#1a2238",
+			"--dsw-specific-login-input": "#1a2238",
+			"--dsw-specific-tip": "#1a2238",
+			"--dsw-specific-bubble": "#2c3765",
+			"--dsw-specific-bubble-highlight": "#33417a"
+		};
+		/** Alpha offsets per token (mirrors renderSkinClientJs); tip/bubble are always opaque. */
+		const TUNER_ALPHA_OFFSET = {
+			"--dsw-alias-bg-base": 0,
+			"--dsw-alias-bg-layer-1": 0.05,
+			"--dsw-alias-bg-layer-2": 0.10,
+			"--dsw-alias-bg-layer-3": 0.13,
+			"--dsw-alias-bg-module-platform": 0.10,
+			"--dsw-alias-bg-multi-select": 0.25,
+			"--dsw-alias-bg-overlay": 0.37,
+			"--dsw-specific-sidebar-fill": 0.05,
+			"--dsw-specific-menu": 0.40,
+			"--dsw-specific-selector": 0.30,
+			"--dsw-specific-input-major": 0.05,
+			"--dsw-specific-login-input": 0.05,
+			"--dsw-specific-tip": 1,
+			"--dsw-specific-bubble": 1,
+			"--dsw-specific-bubble-highlight": 1
+		};
+		const TUNER_TOKEN_NAMES = Object.keys(TUNER_ALPHA_OFFSET);
+		const TUNER_SKELETON_VAR = "--dsw-alias-bg-skeleton";
+		const TUNER_DEFAULTS = { panelOpacity: 0.4, scrim: 0.5 };
+		/** 8-digit #rrggbbaa from a hex color + alpha (mirrors hex8 in the host). */
+		function tunerHex8(hex, alpha) {
+			const a = Math.max(0, Math.min(1, alpha));
+			return hex + Math.round(a * 255).toString(16).padStart(2, "0");
+		}
+		/** Clamp a value to [0.05, 1] (mirrors P() in the skin renderer). */
+		function tunerP(value) {
+			return Math.min(1, Math.max(0.05, value));
+		}
+		/** The active custom-skin id (data-dsh-<id> not owned by an official skin), or null. */
+		function tunerSkinId() {
+			const attrs = document.body.getAttributeNames().filter((n) => /^data-dsh-/.test(n) && n !== "data-dsh-skin-center");
+			const custom = attrs.find((n) => !TUNER_OFFICIAL_ATTRS.has(n));
+			return custom === void 0 ? null : custom.slice("data-dsh-".length);
+		}
+		/** Read the alpha byte of an 8-digit hex color value (#rrggbbaa → 0..1), or null. */
+		function tunerHexAlpha(value) {
+			if (typeof value !== "string") return null;
+			const match = /^#([0-9a-f]{8})$/i.exec(value.trim());
+			if (match === null) return null;
+			return parseInt(match[1].slice(6, 8), 16) / 255;
+		}
+		/** Read the trailing alpha of an rgba() string, or null. */
+		function tunerRgbaAlpha(value) {
+			if (typeof value !== "string") return null;
+			const match = /rgba?\(([^)]*)\)/.exec(value.trim());
+			if (match === null) return null;
+			const parts = match[1].split(",");
+			const last = Number(parts[parts.length - 1].trim());
+			return Number.isFinite(last) ? last : null;
+		}
+		/** Infer the skin's current panelOpacity / scrim from computed tokens. */
+		function tunerReadCurrent() {
+			const style = getComputedStyle(document.body);
+			const baseAlpha = tunerHexAlpha(style.getPropertyValue("--dsw-alias-bg-base"));
+			const skeletonAlpha = tunerRgbaAlpha(style.getPropertyValue(TUNER_SKELETON_VAR));
+			return {
+				panelOpacity: baseAlpha === null ? TUNER_DEFAULTS.panelOpacity : baseAlpha,
+				scrim: skeletonAlpha === null ? TUNER_DEFAULTS.scrim : Math.max(0, Math.min(1, (skeletonAlpha - 0.04) / 0.04))
+			};
+		}
+		/** Load the saved tuner values for a skin id (or defaults). */
+		function tunerLoad(skinId) {
+			try {
+				const store = JSON.parse(localStorage.getItem(TUNER_STORE_KEY) || "{}");
+				const saved = store[skinId];
+				if (saved && typeof saved.panelOpacity === "number" && typeof saved.scrim === "number") return saved;
+			} catch {}
+			return null;
+		}
+		/** Persist tuner values for a skin id. */
+		function tunerSave(skinId, values) {
+			try {
+				const store = JSON.parse(localStorage.getItem(TUNER_STORE_KEY) || "{}");
+				store[skinId] = values;
+				localStorage.setItem(TUNER_STORE_KEY, JSON.stringify(store));
+			} catch {}
+		}
+		/** Rewrite every theme token on the body with the tuned alpha values. */
+		function tunerApplyTokens(dark, panelOpacity, scrim) {
+			const base = dark ? TUNER_DARK_BASE : TUNER_LIGHT_BASE;
+			const body = document.body;
+			for (const name of TUNER_TOKEN_NAMES) {
+				const alpha = TUNER_ALPHA_OFFSET[name] === 1 ? 1 : tunerP(panelOpacity + TUNER_ALPHA_OFFSET[name]);
+				body.style.setProperty(name, tunerHex8(base[name], alpha));
+			}
+			const skeletonRgb = dark ? "255,255,255" : "28,37,70";
+			body.style.setProperty(TUNER_SKELETON_VAR, `rgba(${skeletonRgb},${(0.04 + scrim * 0.04).toFixed(2)})`);
+		}
+		/** Rewrite the backdrop gradient with the tuned scrim, keeping the image url. */
+		function tunerApplyBackdrop(scrim, dark) {
+			const current = document.body.style.backgroundImage || "";
+			const urlMatch = /url\([^)]*\)/.exec(current);
+			if (urlMatch === null) return;
+			const a1 = dark ? 0.18 + scrim * 0.30 : 0.06 + scrim * 0.10;
+			const a2 = dark ? 0.32 + scrim * 0.40 : 0.10 + scrim * 0.16;
+			const rgb = dark ? "4,8,20" : "255,255,255";
+			const gradient = `linear-gradient(rgba(${rgb},${a1.toFixed(3)}) 0%, rgba(${rgb},${a2.toFixed(3)}) 100%)`;
+			document.body.style.setProperty("background-image", `${gradient}, ${urlMatch[0]}`);
+		}
+		/** Apply the effective (saved or explicit) values to the page. */
+		function tunerApplyAll(skinId, state) {
+			const saved = tunerLoad(skinId);
+			const dark = document.body.dataset.dsDarkTheme !== void 0;
+			const panelOpacity = typeof state?.panelOpacity === "number" ? state.panelOpacity : (saved?.panelOpacity ?? null);
+			const scrim = typeof state?.scrim === "number" ? state.scrim : (saved?.scrim ?? null);
+			if (panelOpacity === null || scrim === null) return null;
+			tunerApplyTokens(dark, panelOpacity, scrim);
+			tunerApplyBackdrop(scrim, dark);
+			return { panelOpacity, scrim, dark };
+		}
+		/**
+		* Mount the floating tuner bar (top-right) when a custom background skin
+		* is active. The theme toggle leads the controls; the panel opacity and
+		* scrim sliders rewrite tokens live and persist per skin id. A body
+		* MutationObserver re-applies after any light/dark flip so the skin's
+		* compiled scrim never wins back over the tuned values.
+		* @param theme - the official theme runtime (light/dark switch).
+		*/
+		// Module-level tuner state: one body watcher, one mounted instance.
+		let tunerTheme = null;
+		let tunerBodyObserver = null;
+		let tunerMounted = null;
+		/**
+		* Build the tuner DOM for a custom skin id and wire every control.
+		* @param skinId - the active custom skin id.
+		* @param theme - the official theme runtime.
+		* @returns a cleanup function that tears the tuner down.
+		*/
+		function tunerBuild(skinId, theme) {
+			const isDark = () => document.body.dataset.dsDarkTheme !== void 0;
+			const root = document.createElement("div");
+			root.dataset.skinTuner = "";
+			root.style.cssText = [
+				"position:fixed",
+				"z-index:2147483000",
+				"width:232px",
+				"padding:12px 14px",
+				"box-sizing:border-box",
+				"border-radius:10px",
+				"border:1px solid var(--dsw-alias-border-l1,#e2e8f0)",
+				"background:var(--dsw-alias-bg-layer-2,#e9edf7)",
+				"color:var(--dsw-alias-label-primary,#172a45)",
+				"box-shadow:0 8px 24px rgba(0,0,0,.18)",
+				"font:12px/1.5 system-ui,sans-serif"
+			].join(";");
+			// Restore the saved position, or default to the top-right corner.
+			const posKey = TUNER_POS_KEY + skinId;
+			let pos = null;
+			try {
+				const raw = localStorage.getItem(posKey);
+				if (raw !== null) {
+					const parsed = JSON.parse(raw);
+					if (parsed && Number.isFinite(parsed.left) && Number.isFinite(parsed.top)) pos = parsed;
+				}
+			} catch {}
+			if (pos === null) {
+				pos = { left: Math.max(12, window.innerWidth - 244), top: 92 };
+			}
+			const paintPos = () => {
+				root.style.left = `${pos.left}px`;
+				root.style.top = `${pos.top}px`;
+			};
+			paintPos();
+			const title = document.createElement("div");
+			title.style.cssText = "display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-weight:600;cursor:move;user-select:none";
+			const titleText = document.createElement("span");
+			titleText.textContent = "";
+			titleText.style.cssText = "flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis";
+			const collapse = document.createElement("button");
+			collapse.type = "button";
+			collapse.textContent = "";
+			collapse.style.cssText = "border:0;background:0 0;color:inherit;cursor:pointer;font-size:11px;opacity:.7";
+			title.append(titleText, collapse);
+			root.append(title);
+			/** Drag the tuner by its title bar; position persists per skin id. */
+			let dragState = null;
+			const dragMove = (event) => {
+				if (dragState === null) return;
+				pos.left = Math.max(4, Math.min(window.innerWidth - root.offsetWidth - 4, dragState.startLeft + event.clientX - dragState.startX));
+				pos.top = Math.max(4, Math.min(window.innerHeight - root.offsetHeight - 4, dragState.startTop + event.clientY - dragState.startY));
+				paintPos();
+			};
+			const dragEnd = () => {
+				if (dragState === null) return;
+				window.removeEventListener("pointermove", dragMove);
+				window.removeEventListener("pointerup", dragEnd);
+				dragState = null;
+				try { localStorage.setItem(posKey, JSON.stringify(pos)); } catch {}
+			};
+			title.addEventListener("pointerdown", (event) => {
+				// Do not start a drag when the collapse button was clicked.
+				if (event.target === collapse) return;
+				if (event.button !== 0) return;
+				const rect = root.getBoundingClientRect();
+				dragState = { startLeft: rect.left, startTop: rect.top, startX: event.clientX, startY: event.clientY };
+				window.addEventListener("pointermove", dragMove);
+				window.addEventListener("pointerup", dragEnd);
+				event.preventDefault();
+			});
+			/** Build one labeled slider row (label line + control line); returns {row, lab, slider, value}. */
+			const sliderRow = () => {
+				const row = document.createElement("div");
+				row.style.cssText = "margin-top:8px";
+				const lab = document.createElement("div");
+				lab.textContent = "";
+				lab.style.cssText = "font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis";
+				const control = document.createElement("div");
+				control.style.cssText = "display:flex;align-items:center;gap:8px;margin-top:4px";
+				const val = document.createElement("span");
+				val.textContent = "0%";
+				val.style.cssText = "width:38px;text-align:right;font-variant-numeric:tabular-nums";
+				const slider = document.createElement("input");
+				slider.type = "range";
+				slider.min = "0.05";
+				slider.max = "1";
+				slider.step = "0.05";
+				slider.style.cssText = "flex:1.2;accent-color:var(--dsw-alias-brand-primary,#2b7cd9)";
+				control.append(slider, val);
+				row.append(lab, control);
+				return { row, lab, slider, val };
+			};
+			/** Language toggle row — radio buttons, independent of the system locale. */
+			const langRow = document.createElement("div");
+			langRow.style.cssText = "display:table;table-layout:fixed;width:100%;margin-top:2px";
+			const langLabel = document.createElement("span");
+			langLabel.textContent = "";
+			langLabel.style.cssText = "display:table-cell;vertical-align:middle;width:60%;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis";
+			const langZh = document.createElement("label");
+			langZh.style.cssText = "display:table-cell;vertical-align:middle;width:20%;cursor:pointer;font-size:12px;white-space:nowrap";
+			const langEn = document.createElement("label");
+			langEn.style.cssText = "display:table-cell;vertical-align:middle;width:20%;cursor:pointer;font-size:12px;white-space:nowrap";
+			const langZhRadio = document.createElement("input");
+			langZhRadio.type = "radio";
+			langZhRadio.name = "skin-tuner-lang";
+			langZhRadio.value = "zh";
+			const langEnRadio = document.createElement("input");
+			langEnRadio.type = "radio";
+			langEnRadio.name = "skin-tuner-lang";
+			langEnRadio.value = "en";
+			const langZhText = document.createElement("span");
+			langZhText.textContent = "中文";
+			const langEnText = document.createElement("span");
+			langEnText.textContent = "English";
+			langZh.append(langZhRadio, langZhText);
+			langEn.append(langEnRadio, langEnText);
+			langRow.append(langLabel, langZh, langEn);
+			root.append(langRow);
+			/** Upload row — pick any local image as a new background (above the theme toggle). */
+			const uploadRow = document.createElement("div");
+			uploadRow.style.cssText = "display:flex;align-items:center;gap:8px;margin-top:2px;position:relative";
+			const uploadBtn = document.createElement("button");
+			uploadBtn.type = "button";
+			uploadBtn.style.cssText = "flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--dsw-alias-border-l1,#e2e8f0);background:var(--dsw-alias-bg-layer-1,#f1f5f9);color:inherit;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px";
+			const uploadText = document.createElement("span");
+			uploadText.textContent = "";
+			const uploadIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			uploadIcon.setAttribute("width", "12");
+			uploadIcon.setAttribute("height", "12");
+			uploadIcon.setAttribute("viewBox", "0 0 24 24");
+			uploadIcon.setAttribute("fill", "none");
+			uploadIcon.setAttribute("stroke", "currentColor");
+			uploadIcon.setAttribute("stroke-width", "2");
+			uploadIcon.setAttribute("stroke-linecap", "round");
+			uploadIcon.setAttribute("stroke-linejoin", "round");
+			uploadIcon.setAttribute("aria-hidden", "true");
+			const uploadIconPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+			uploadIconPath.setAttribute("d", "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12");
+			uploadIcon.append(uploadIconPath);
+			uploadBtn.append(uploadText, uploadIcon);
+			const fileInput = document.createElement("input");
+			fileInput.type = "file";
+			fileInput.accept = "image/png,image/jpeg,image/webp,image/gif";
+			fileInput.style.display = "none";
+			/** "图片要求" link with a hover tooltip. */
+			const tipLink = document.createElement("span");
+			tipLink.style.cssText = "display:inline-flex;align-items:center;gap:2px;flex:none;color:var(--dsw-alias-brand-primary,#2b7cd9);text-decoration:underline;cursor:help;font-size:11px;white-space:nowrap";
+			const tipText = document.createElement("span");
+			tipText.textContent = "";
+			const tipBubble = document.createElement("div");
+			tipBubble.textContent = "";
+			tipBubble.style.cssText = "position:absolute;top:calc(100% + 6px);right:0;width:210px;padding:8px 10px;box-sizing:border-box;border-radius:8px;border:1px solid #333;background:#000;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.5);z-index:2147483001;font-weight:400;line-height:1.5;display:none;white-space:normal";
+			tipLink.append(tipText, tipBubble);
+			tipLink.addEventListener("mouseenter", () => { tipBubble.style.display = "block"; });
+			tipLink.addEventListener("mouseleave", () => { tipBubble.style.display = "none"; });
+			uploadRow.append(uploadBtn, tipLink, fileInput);
+			/** Poll the host state until the new skin is active (or time out). */
+			const confirmActive = (target) => new Promise((resolve) => {
+				let tries = 0;
+				const tick = () => {
+					tries += 1;
+					fetch("/api/skin-center/state").then(async (response) => {
+						const payload = await response.json().catch(() => null);
+						if (response.ok && payload?.ok === true && payload.active === target) {
+							resolve(true);
+							return;
+						}
+						if (tries >= 20) resolve(false);
+						else window.setTimeout(tick, 250);
+					}).catch(() => {
+						if (tries >= 20) resolve(false);
+						else window.setTimeout(tick, 250);
+					});
+				};
+				tick();
+			});
+			/** Upload the picked image, passing the current tuner values along. */
+			const uploadImage = (file) => {
+				const resetLabel = () => { uploadText.textContent = tunerT("tunerUpload"); };
+				if (typeof file.type !== "string" || !file.type.startsWith("image/")) {
+					uploadText.textContent = tunerT("tunerImageOnly");
+					window.setTimeout(resetLabel, 1500);
+					return;
+				}
+				if (file.size > 20 * 1024 * 1024) {
+					uploadText.textContent = tunerT("tunerTooLarge");
+					window.setTimeout(resetLabel, 1500);
+					return;
+				}
+				uploadBtn.disabled = true;
+				uploadText.textContent = tunerT("tunerUploading");
+				const objectUrl = URL.createObjectURL(file);
+				const img = new Image();
+				img.onload = () => {
+					try {
+						const maxSide = 1920;
+						const scale = Math.min(1, maxSide / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
+						const canvas = document.createElement("canvas");
+						canvas.width = Math.max(1, Math.round((img.naturalWidth || 1) * scale));
+						canvas.height = Math.max(1, Math.round((img.naturalHeight || 1) * scale));
+						const context = canvas.getContext("2d");
+						if (context === null) throw new Error("canvas-unavailable");
+						context.drawImage(img, 0, 0, canvas.width, canvas.height);
+						const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+						// Pass the current panel opacity / scrim so the generated
+						// skin compiles with the tuned defaults baked in.
+						const current = tunerLoad(skinId) ?? { panelOpacity: Number(panel.slider.value), scrim: Number(scrim.slider.value) };
+						fetch("/api/skin-center/apply-image", {
+							method: "POST",
+							headers: { "content-type": "application/json" },
+							body: JSON.stringify({
+								image: dataUrl,
+								name: (file.name.replace(/\.[^.]+$/, "") || "custom").slice(0, 40),
+								panelOpacity: current.panelOpacity,
+								scrim: current.scrim
+							})
+						}).then(async (response) => {
+							const payload = await response.json().catch(() => null);
+							if (!response.ok || payload?.ok !== true) throw new Error(payload?.error ?? `HTTP ${response.status}`);
+							uploadText.textContent = tunerT("tunerAppliedRefresh");
+							confirmActive(payload.active).then((confirmed) => {
+								if (confirmed) window.location.reload();
+								else {
+									uploadBtn.disabled = false;
+									uploadText.textContent = tunerT("tunerAppliedUnconfirmed");
+								}
+							});
+						}).catch((cause) => {
+							uploadBtn.disabled = false;
+							const detail = cause instanceof Error ? cause.message : String(cause);
+							uploadText.textContent = `${tunerT("tunerUploadFailed")}（${detail}）`;
+							window.setTimeout(resetLabel, 3000);
+						});
+					} catch (cause) {
+						URL.revokeObjectURL(objectUrl);
+						uploadBtn.disabled = false;
+						uploadText.textContent = `${tunerT("tunerProcessFailed")}（${cause instanceof Error ? cause.message : String(cause)}）`;
+						window.setTimeout(resetLabel, 3000);
+					}
+				};
+				img.onerror = () => {
+					URL.revokeObjectURL(objectUrl);
+					uploadBtn.disabled = false;
+					uploadText.textContent = tunerT("tunerReadFailed");
+					window.setTimeout(resetLabel, 3000);
+				};
+				img.src = objectUrl;
+			};
+			uploadBtn.addEventListener("click", () => { fileInput.click(); });
+			fileInput.addEventListener("change", (event) => {
+				const file = event.target.files?.[0];
+				event.target.value = "";
+				if (file !== void 0) uploadImage(file);
+			});
+			/** Theme toggle row — two-cell table, 50/50 columns. */
+			const themeRow = document.createElement("div");
+			themeRow.style.cssText = "display:table;table-layout:fixed;width:100%;margin-top:2px";
+			const themeLabel = document.createElement("span");
+			themeLabel.textContent = "";
+			themeLabel.style.cssText = "display:table-cell;vertical-align:middle;width:50%;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis";
+			const themeBtnCell = document.createElement("div");
+			themeBtnCell.style.cssText = "display:table-cell;vertical-align:middle;width:50%;white-space:nowrap;text-align:right";
+			const lightBtn = document.createElement("button");
+			lightBtn.type = "button";
+			lightBtn.textContent = "";
+			const darkBtn = document.createElement("button");
+			darkBtn.type = "button";
+			darkBtn.textContent = "";
+			const themeBtnStyle = "display:inline-block;border:1px solid var(--dsw-alias-border-l1,#e2e8f0);background:var(--dsw-alias-bg-layer-1,#f1f5f9);color:inherit;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px;white-space:nowrap;vertical-align:middle";
+			lightBtn.style.cssText = themeBtnStyle;
+			darkBtn.style.cssText = themeBtnStyle + ";margin-left:8px";
+			const paintTheme = () => {
+				const dark = isDark();
+				lightBtn.style.outline = dark ? "none" : "2px solid var(--dsw-alias-brand-primary,#2b7cd9)";
+				darkBtn.style.outline = dark ? "2px solid var(--dsw-alias-brand-primary,#2b7cd9)" : "none";
+			};
+			themeBtnCell.append(lightBtn, darkBtn);
+			themeRow.append(themeLabel, themeBtnCell);
+			root.append(themeRow);
+			root.append(uploadRow);
+			/** panelOpacity slider. */
+			const panel = sliderRow();
+			root.append(panel.row);
+			/** scrim slider. */
+			const scrim = sliderRow();
+			root.append(scrim.row);
+			/** Save + reset buttons (side by side). */
+			const btnRow = document.createElement("div");
+			btnRow.style.cssText = "display:flex;gap:8px;margin-top:10px";
+			const save = document.createElement("button");
+			save.type = "button";
+			save.textContent = "";
+			const reset = document.createElement("button");
+			reset.type = "button";
+			reset.textContent = "";
+			const btnStyle = themeBtnStyle + ";flex:1";
+			save.style.cssText = btnStyle;
+			reset.style.cssText = btnStyle;
+			btnRow.append(save, reset);
+			root.append(btnRow);
+			/** Sync the sliders with the given values. */
+			const sync = (panelOpacity, scrimValue) => {
+				panel.slider.value = String(panelOpacity);
+				panel.val.textContent = `${Math.round(panelOpacity * 100)}%`;
+				scrim.slider.value = String(scrimValue);
+				scrim.val.textContent = `${Math.round(scrimValue * 100)}%`;
+				paintTheme();
+			};
+			/** Collapsed state: keep only the title bar (toggle the controls). */
+			const controls = [langRow, uploadRow, themeRow, panel.row, scrim.row, btnRow];
+			const collapsedKey = TUNER_COLLAPSE_KEY + skinId;
+			const isCollapsed = () => localStorage.getItem(collapsedKey) === "1";
+			const applyCollapsed = () => {
+				const collapsed = isCollapsed();
+				for (const el of controls) el.style.display = collapsed ? "none" : "";
+				title.style.marginBottom = collapsed ? "0" : "10px";
+				collapse.textContent = collapsed ? tunerT("tunerExpand") : tunerT("tunerCollapse");
+			};
+			collapse.addEventListener("click", () => {
+				if (isCollapsed()) localStorage.removeItem(collapsedKey);
+				else localStorage.setItem(collapsedKey, "1");
+				applyCollapsed();
+			});
+			document.body.append(root);
+			/** Paint every static label from the current language (re-run on lang change). */
+			const paintLabels = () => {
+				title.title = tunerT("tunerDragHint");
+				titleText.textContent = tunerT("tunerTitle");
+				langLabel.textContent = tunerT("tunerLangLabel");
+				uploadText.textContent = tunerT("tunerUpload");
+				tipText.textContent = tunerT("tunerImageTip");
+				tipBubble.textContent = tunerT("tunerImageTipText");
+				themeLabel.textContent = tunerT("tunerTheme");
+				lightBtn.textContent = tunerT("tunerThemeLight");
+				darkBtn.textContent = tunerT("tunerThemeDark");
+				panel.lab.textContent = tunerT("tunerPanelOpacity");
+				scrim.lab.textContent = tunerT("tunerScrim");
+				save.textContent = tunerT("tunerSave");
+				reset.textContent = tunerT("tunerReset");
+				applyCollapsed();
+			};
+			// Language radios: persist the preference and re-paint on change.
+			const syncLangRadios = () => {
+				langZhRadio.checked = tunerLang() === "zh";
+				langEnRadio.checked = tunerLang() === "en";
+			};
+			langZhRadio.addEventListener("change", () => {
+				if (!langZhRadio.checked) return;
+				tunerSetLang("zh");
+				syncLangRadios();
+				paintLabels();
+			});
+			langEnRadio.addEventListener("change", () => {
+				if (!langEnRadio.checked) return;
+				tunerSetLang("en");
+				syncLangRadios();
+				paintLabels();
+			});
+			syncLangRadios();
+			paintLabels();
+			/** Live rewrite on slider input (persist only via the Save button). */
+			const onChange = () => {
+				const values = {
+					panelOpacity: Number(panel.slider.value),
+					scrim: Number(scrim.slider.value)
+				};
+				sync(values.panelOpacity, values.scrim);
+				tunerApplyTokens(isDark(), values.panelOpacity, values.scrim);
+				tunerApplyBackdrop(values.scrim, isDark());
+			};
+			panel.slider.addEventListener("input", onChange);
+			scrim.slider.addEventListener("input", onChange);
+			lightBtn.addEventListener("click", () => { theme.setTheme("light"); });
+			darkBtn.addEventListener("click", () => { theme.setTheme("dark"); });
+			// Save: persist the current slider values for this skin.
+			save.addEventListener("click", () => {
+				tunerSave(skinId, {
+					panelOpacity: Number(panel.slider.value),
+					scrim: Number(scrim.slider.value)
+				});
+				save.textContent = tunerT("tunerSaved");
+				window.setTimeout(() => { save.textContent = tunerT("tunerSave"); }, 1200);
+			});
+			// Reset: restore the previously saved settings; if none were saved,
+			// drop the inline overrides so the skin's compiled defaults win.
+			reset.addEventListener("click", () => {
+				const saved = tunerLoad(skinId);
+				if (saved !== null) {
+					sync(saved.panelOpacity, saved.scrim);
+					tunerApplyTokens(isDark(), saved.panelOpacity, saved.scrim);
+					tunerApplyBackdrop(saved.scrim, isDark());
+					reset.textContent = tunerT("tunerRestored");
+				} else {
+					const body = document.body;
+					for (const name of TUNER_TOKEN_NAMES) body.style.removeProperty(name);
+					body.style.removeProperty(TUNER_SKELETON_VAR);
+					const current = tunerReadCurrent();
+					tunerApplyBackdrop(current.scrim, isDark());
+					sync(current.panelOpacity, current.scrim);
+					reset.textContent = tunerT("tunerResetDone");
+				}
+				window.setTimeout(() => { reset.textContent = tunerT("tunerReset"); }, 1200);
+			});
+			// Re-apply tuned values after any light/dark flip (deferred so the
+			// skin's own observer — which writes the compiled scrim — runs first).
+			const themeObserver = new MutationObserver(() => {
+				window.setTimeout(() => {
+					if (document.querySelector("[data-skin-tuner]") === null) return;
+					const applied = tunerApplyAll(skinId, null);
+					if (applied !== null) sync(applied.panelOpacity, applied.scrim);
+				}, 0);
+			});
+			themeObserver.observe(document.body, { attributes: true, attributeFilter: ["data-ds-dark-theme"] });
+			// Initial state: reuse the saved values when present; otherwise keep
+			// the skin's compiled defaults and reflect them on the sliders.
+			const initial = tunerApplyAll(skinId, null);
+			if (initial !== null) sync(initial.panelOpacity, initial.scrim);
+			else {
+				const current = tunerReadCurrent();
+				sync(current.panelOpacity, current.scrim);
+			}
+			applyCollapsed();
+			return () => {
+				themeObserver.disconnect();
+				root.remove();
+				// Drop the inline token overrides we wrote so the skin stylesheet
+				// (or the next skin) controls these variables again.
+				const body = document.body;
+				for (const name of TUNER_TOKEN_NAMES) body.style.removeProperty(name);
+				body.style.removeProperty(TUNER_SKELETON_VAR);
+			};
+		}
+		/** The tuner switch state: on by default, persisted in localStorage. */
+		function tunerEnabled() {
+			try { return localStorage.getItem(TUNER_ENABLED_KEY) !== "0"; } catch { return true; }
+		}
+		/** (Re)assess whether a custom skin is active and mount/unmount the tuner. */
+		function tunerSync() {
+			const skinId = tunerSkinId();
+			if (!tunerEnabled() || skinId === null) {
+				if (tunerMounted !== null) {
+					tunerMounted.cleanup();
+					tunerMounted = null;
+				}
+				return;
+			}
+			if (tunerMounted !== null && tunerMounted.skinId !== skinId) {
+				tunerMounted.cleanup();
+				tunerMounted = null;
+			}
+			if (tunerMounted === null) {
+				tunerMounted = { skinId, cleanup: tunerBuild(skinId, tunerTheme) };
+			}
+		}
+		/**
+		* Watch the body for custom-skin activation and mount the floating tuner
+		* bar (top-right) when one appears. The skin bundle may apply after this
+		* bundle, so the initial check can legitimately see no custom skin yet —
+		* the attribute watcher picks it up the moment it lands. The theme toggle
+		* leads the controls; panel opacity and scrim sliders rewrite tokens live
+		* and persist per skin id. A body MutationObserver re-applies after any
+		* light/dark flip so the skin's compiled scrim never wins back. The
+		* in-card "Image background tuner" switch controls visibility via the
+		* localStorage flag + a window event.
+		* @param theme - the official theme runtime (light/dark switch).
+		*/
+		function mountBackgroundTuner(theme) {
+			tunerTheme = theme;
+			if (tunerBodyObserver === null) {
+				tunerBodyObserver = new MutationObserver(tunerSync);
+				tunerBodyObserver.observe(document.body, { attributes: true });
+			}
+			// The in-card switch flips this flag + fires this event; re-sync so the
+			// floating bar appears / disappears immediately without a reload.
+			window.addEventListener(TUNER_TOGGLE_EVENT, tunerSync);
+			tunerSync();
+		}
 		//#endregion
 		//#region src/client/index.ts
 		/** Locale namespace owned by this plugin. */
@@ -1114,6 +1809,13 @@ window.__ModuleLoader__.load({
 				locale: NS,
 				inject: injected
 			}, SkinCenter));
+			// Floating background tuner for custom background skins (theme
+			// toggle + panel opacity + scrim, live rewrite, per-skin persistence).
+			try {
+				mountBackgroundTuner(theme);
+			} catch (error) {
+				console.error("[ui-skin-center] background tuner mount failed:", error);
+			}
 		}
 		//#endregion
 		exports.NS = NS;
