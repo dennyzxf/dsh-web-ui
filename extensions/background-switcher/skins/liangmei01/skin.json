@@ -1,0 +1,17 @@
+{
+  "id": "liangmei01",
+  "name": "liangmei01",
+  "nameEn": "liangmei01",
+  "author": "DSH background-switcher",
+  "tagline": "自定义背景图皮肤 · liangmei01",
+  "description": "由 background-switcher 技能生成的背景图皮肤：图片（liangmei01.png）以全屏背景垫在界面之下，面板半透明毛玻璃，遮罩随亮/暗主题自动切换。",
+  "tags": [],
+  "accent": "#2e9bff",
+  "bodyAttr": "data-dsh-liangmei01",
+  "package": "@linxin666/dsh-client-ui-skin-liangmei01",
+  "wiring": {
+    "id": "ui-skin-liangmei01",
+    "bundleWired": false
+  },
+  "order": 999
+}

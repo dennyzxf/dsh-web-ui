@@ -1,0 +1,17 @@
+{
+  "id": "aurora-sea",
+  "name": "极光之海",
+  "nameEn": "Aurora Sea",
+  "author": "DSH background-switcher",
+  "tagline": "测试背景 · 极光之海",
+  "description": "由 background-switcher 技能生成的背景图皮肤：图片（test-backdrop.svg）以全屏背景垫在界面之下，面板半透明毛玻璃，遮罩随亮/暗主题自动切换。",
+  "tags": [],
+  "accent": "#2e9bff",
+  "bodyAttr": "data-dsh-aurora-sea",
+  "package": "@linxin666/dsh-client-ui-skin-aurora-sea",
+  "wiring": {
+    "id": "ui-skin-aurora-sea",
+    "bundleWired": false
+  },
+  "order": 999
+}
