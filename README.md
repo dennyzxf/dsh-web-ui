@@ -54,7 +54,7 @@
 
 ![背景调节浮动窗](docs/screenshots/Image-background-tuner/cn/cn-02.png)
 
-![选择背景图片并调节参数保存](docs/screenshots/Image-background-tuner/cn/cn-03.png)
+![选择背景图片并调节参数](docs/screenshots/Image-background-tuner/cn/cn-03.png)
 
 
 ## 如何下载本 Fork 的增强功能 ##

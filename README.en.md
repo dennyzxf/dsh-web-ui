@@ -49,11 +49,11 @@ Select an image as the interface background and fine-tune the final effect in re
 
 **Restore offical look:** Restore offical look at any time .
 
-https://docs/screenshots/Image-background-tuner/en/en-01.png
+![On/Off Toggle](https://docs/screenshots/Image-background-tuner/en/en-01.png)
 
-https://docs/screenshots/Image-background-tuner/en/en-02.png
+![Real-Time Adjustment](https://docs/screenshots/Image-background-tuner/en/en-02.png)
 
-https://docs/screenshots/Image-background-tuner/en/en-03.png
+![Upload Background Image](https://docs/screenshots/Image-background-tuner/en/en-03.png)
 
 ## How to Download This Fork's Enhanced Features ##
 This Fork is based on the official dsh-web-ui and additionally provides the background image adjustment feature.
