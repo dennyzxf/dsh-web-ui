@@ -1,27 +1,111 @@
-# dsh-web-ui · DSH Web UI
+# dsh-web-ui · DSH Web UI 
 
 中文 | [English](README.en.md)
 
-![dsh-web-ui](docs/dsh-web-ui-banner.png)
+> ## **DeepSeek Harness (DSH) Web UI 插件与皮肤生态。** ##
 
-dsh-web-ui 是 DeepSeek Harness（DSH）Web UI 的插件与皮肤集合：任务看板、Git 图谱、右侧面板、移动端远程、远程连接、图像理解工具、鲸鱼娘宠物、实时令牌统计，以及皮肤中心。所有插件既可独立安装，也可通过聚合包一次装齐。
+[官方项目](https://github.com/zhu1090093659/dsh-web-ui) · [本 Fork](https://github.com/dennyzxf/dsh-web-ui/tree/feature/background-switcher)
 
-> <span style="text-decoration:underline;text-decoration-color:#e11d48;">**本仓库增强（fork）**：在官方 dsh-web-ui 基础上新增「背景图片调节」——选择任意图片作为界面背景，浮动调节窗内实时调整明暗、面板不透明度与遮罩强度，一键保存、跨刷新保持；皮肤中心设置中的开关随时显示 / 隐藏调节窗。</span>
 
-### 背景图片调节
+## 为什么有这个【Fork】？##
+
+官方 `dsh-web-ui` 提供了非常完整的 DSH Web UI
+插件与皮肤生态。
+
+本 Fork 的目标不是替代官方项目，而是在保持
+上游兼容的基础上，实验和提供额外的 UI 能力。
+
+当前新增：
+
+> - 自定义背景图片
+> - 实时明暗调节
+> - 面板透明度调节
+> - 背景遮罩调节
+
+未来会继续以独立扩展的形式维护这些增强功能。
+
+## 本【Fork】新增功能：自定义背景图片和背景参数并保存 ##
+
+**在官方 dsh-web-ui 的基础上，本项目新增「背景图片调节」功能：**
+
+- 与皮肤中心联动
+- 随时开启 / 关闭 背景图片参数调节窗口
+- 选择任意图片作为 DSH 背景
+- 实时调整明暗、面板透明度、背景遮罩
+- 重置回官方默认外观
+
+> **如果你只对“背景图片调节”感兴趣，可以直接查看：**
+> [项目源文件](https://github.com/dennyzxf/dsh-web-ui/tree/feature/background-switcher)
+
+
+## 背景图片调节 功能使用介绍 ##
 
 选择一张图片作为界面背景，并在浮动调节窗里实时微调最终效果：
 
+- **随时开关**：在皮肤中心设置中的「图片背景调节」开关控制浮动窗显示 / 隐藏（绿色开启、灰色关闭）。
+
 - **上传背景图**：从任意目录选择图片（推荐 1920×1080 或 16:9），自动压缩后应用为背景，无需重启；
+
 - **实时调节**：浮动窗内可切换亮 / 暗主题、调节面板不透明度与背景遮罩强度，改动即时呈现；
-- **保存与恢复**：调节结果一键保存、跨刷新保持，也可随时恢复到之前保存的设置；
-- **随时开关**：皮肤中心设置中的「图片背景调节」开关控制浮动窗显示 / 隐藏（绿色开启、灰色关闭）。
+
+- **恢复官方默认外观**：随时可以恢复到官方默认外观设置；
 
 ![背景图片调节开关](docs/screenshots/Image-background-tuner/cn/cn-01.png)
 
 ![背景调节浮动窗](docs/screenshots/Image-background-tuner/cn/cn-02.png)
 
-![选择背景图片](docs/screenshots/Image-background-tuner/cn/cn-03.png)
+![选择背景图片并调节参数保存](docs/screenshots/Image-background-tuner/cn/cn-03.png)
+
+
+## 如何下载本 Fork 的增强功能 ##
+> 本 Fork 基于官方 dsh-web-ui，并额外提供背景图片调节功能。
+
+### **推荐方式** ###
+
+**克隆本 Fork：**
+
+git clone -b feature/background-switcher https://github.com/dennyzxf/dsh-web-ui.git
+
+cd dsh-web-ui
+
+pnpm install
+pnpm -r build
+
+node scripts/link-profile.mjs
+
+dsh plugin --profile web add link:$(pwd)/packages/dsh-web-ui-all
+
+**重启：**
+
+dsh web
+
+## 本 [Fork]  Background Switcher #
+
+**完整代码与使用说明：**
+
+[`background-switcher`](https://https://github.com/dennyzxf/dsh-web-ui/tree/feature/background-switcher)
+
+> [!IMPORTANT]
+> ## 本 Fork 与官方版本的区别 ##
+>
+> 本项目基于官方 [`zhu1090093659/dsh-web-ui`](https://github.com/zhu1090093659/dsh-web-ui)。
+>
+> **新增：**
+>
+> - 自定义背景图片
+> - 实时明暗调节
+> - 面板透明度调节
+> - 背景遮罩调节
+>
+> 官方项目：
+> https://github.com/zhu1090093659/dsh-web-ui
+
+
+# dsh-web-ui · DSH Web UI
+
+![dsh-web-ui](docs/dsh-web-ui-banner.png)
+
+dsh-web-ui 是 DeepSeek Harness（DSH）Web UI 的插件与皮肤集合：任务看板、Git 图谱、右侧面板、移动端远程、远程连接、图像理解工具、鲸鱼娘宠物、实时令牌统计，以及皮肤中心。所有插件既可独立安装，也可通过聚合包一次装齐。
 
 ![DSH Web UI 主界面](docs/screenshots/13-hero-main.png)
 

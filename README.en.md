@@ -1,27 +1,109 @@
-# dsh-web-ui · DSH Web UI
+# dsh-web-ui · DSH Web UI 
 
 [中文](README.md) | English
+
+> ## **DeepSeek Harness (DSH) Web UI plugin and skin ecosystem.** ##
+
+[Official Project](https://github.com/zhu1090093659/dsh-web-ui) · [This Fork](https://github.com/dennyzxf/dsh-web-ui/tree/feature/background-switcher)
+
+## Why this [Fork]? ##
+
+The official `dsh-web-ui` provides a very complete DSH Web UI plugin and skin ecosystem.
+
+The goal of this Fork is not to replace the official project, but to experiment with and provide additional UI capabilities while maintaining upstream compatibility.
+
+Current new additions:
+
+> - Custom background image
+> - Real-time brightness adjustment
+> - Panel transparency adjustment
+> - Background mask adjustment
+
+In the future, these enhancements will continue to be maintained as independent extensions.
+
+## New features in this [Fork]: Custom background image and background parameters with save support ##
+
+**Based on the official dsh-web-ui, this project adds a "Background Image Adjustment" feature:**
+
+Integrated with the Skin Center
+
+Turn the background image parameter adjustment window on/off at any time
+
+Choose any image as the DSH background
+
+Adjust brightness, panel transparency, and background mask in real time
+
+Restore offical look at any time
+
+> **If you are only interested in the "Background Image Adjustment" feature, you can check out:**
+> [Project Source Files](https://github.com/dennyzxf/dsh-web-ui/tree/feature/background-switcher)
+
+## Background Image Adjustment Feature Guide ##
+Select an image as the interface background and fine-tune the final effect in real time using the floating adjustment window:
+
+**On/Off Toggle:** The floating window is controlled by the "Image Background Adjustment" switch in the Skin Center settings (green for enabled, gray for disabled).
+
+**Upload Background Image:** Select an image from any directory (1920×1080 or 16:9 recommended). The image will be automatically compressed and applied as the background without requiring a restart.
+
+**Real-Time Adjustment:** Within the floating window, you can switch between light/dark themes, adjust panel opacity and background mask intensity. All changes are applied instantly.
+
+**Restore offical look:** Restore offical look at any time .
+
+https://docs/screenshots/Image-background-tuner/en/en-01.png
+
+https://docs/screenshots/Image-background-tuner/en/en-02.png
+
+https://docs/screenshots/Image-background-tuner/en/en-03.png
+
+## How to Download This Fork's Enhanced Features ##
+This Fork is based on the official dsh-web-ui and additionally provides the background image adjustment feature.
+
+### **Recommended Approach** ###
+
+**Clone this Fork:**
+
+git clone -b feature/background-switcher https://github.com/dennyzxf/dsh-web-ui.git
+
+cd dsh-web-ui
+
+pnpm install
+pnpm -r build
+
+node scripts/link-profile.mjs
+
+dsh plugin --profile web add link:$(pwd)/packages/dsh-web-ui-all
+
+**Restart:**
+
+dsh web
+
+## [Fork]  Background Switcher #
+
+**Full source code and usage instructions:**
+
+[`background-switcher`](https://https://github.com/dennyzxf/dsh-web-ui/tree/feature/background-switcher)
+
+[!IMPORTANT]
+> ### Differences between this Fork and the official version
+>
+> This project is based on the official [`zhu1090093659/dsh-web-ui`](https://github.com/zhu1090093659/dsh-web-ui).
+>
+> **New additions:**
+>
+> - Custom background image
+> - Real-time brightness adjustment
+> - Panel transparency adjustment
+> - Background mask adjustment
+>
+> Official project:
+> https://github.com/zhu1090093659/dsh-web-ui
+
+
+# dsh-web-ui · DSH Web UI
 
 ![dsh-web-ui](docs/dsh-web-ui-banner.png)
 
 dsh-web-ui is a collection of plugins and skins for the DeepSeek Harness (DSH) Web UI: a task board, a Git graph, the right panel, mobile remote control, remote connection, a whale-girl pet, live token statistics, and the Skin Center. Every plugin can be installed individually, or all at once through the aggregate packages.
-
-> <span style="text-decoration:underline;text-decoration-color:#e11d48;">**This fork adds**: an "Image Background Tuner" on top of the official dsh-web-ui — pick any image as your interface background, then fine-tune the theme, panel opacity and scrim strength live from a floating panel, save with one click and keep it across reloads; an in-settings switch shows / hides the panel anytime.</span>
-
-### Image Background Tuner
-
-Pick an image as your interface background and fine-tune the final look live from a floating panel:
-
-- **Upload a background**: choose an image from any folder (1920×1080 or 16:9 is recommended), auto-compressed and applied as the background without a restart;
-- **Live tuning**: switch light / dark theme, adjust panel opacity and background scrim strength from the floating panel — changes render instantly;
-- **Save & restore**: persist the tuned result with one click (it survives reloads), or restore the previously saved settings anytime;
-- **On/off switch**: the "Image background tuner" switch in the skin-center settings shows / hides the floating panel (green = on, grey = off).
-
-![Image background tuner switch](docs/screenshots/Image-background-tuner/en/en-01.png)
-
-![Background tuner floating panel](docs/screenshots/Image-background-tuner/en/en-02.png)
-
-![Pick a background image](docs/screenshots/Image-background-tuner/en/en-03.png)
 
 ![DSH Web UI main screen](docs/screenshots/13-hero-main.png)
 

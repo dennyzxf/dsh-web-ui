@@ -1007,11 +1007,10 @@ window.__ModuleLoader__.load({
 			tunerThemeDark: "Dark",
 			tunerPanelOpacity: "Panel opacity",
 			tunerScrim: "Scrim",
-			tunerSave: "Save",
-			tunerSaved: "Saved",
-			tunerReset: "Reset",
-			tunerRestored: "Restored",
-			tunerResetDone: "Reset",
+			tunerReset: "Restore official look",
+			tunerResetting: "Restoring…",
+			tunerResetUnconfirmed: "Applied but unconfirmed — please refresh the page",
+			tunerResetFailed: "Restore failed",
 			tunerUploading: "Uploading…",
 			tunerAppliedRefresh: "Applied, refreshing…",
 			tunerAppliedUnconfirmed: "Applied but unconfirmed — please refresh the page",
@@ -1059,11 +1058,10 @@ window.__ModuleLoader__.load({
 			tunerThemeDark: "暗色",
 			tunerPanelOpacity: "面板不透明度",
 			tunerScrim: "遮罩强度",
-			tunerSave: "保存",
-			tunerSaved: "已保存",
-			tunerReset: "重置",
-			tunerRestored: "已恢复",
-			tunerResetDone: "已重置",
+			tunerReset: "还原官方默认外观",
+			tunerResetting: "还原中…",
+			tunerResetUnconfirmed: "已应用但未确认生效，请刷新页面",
+			tunerResetFailed: "还原失败",
 			tunerUploading: "上传中…",
 			tunerAppliedRefresh: "已应用，刷新中…",
 			tunerAppliedUnconfirmed: "已应用但未确认，请刷新页面",
@@ -1566,19 +1564,15 @@ window.__ModuleLoader__.load({
 			/** scrim slider. */
 			const scrim = sliderRow();
 			root.append(scrim.row);
-			/** Save + reset buttons (side by side). */
+			/** Reset button (restore official look). */
 			const btnRow = document.createElement("div");
 			btnRow.style.cssText = "display:flex;gap:8px;margin-top:10px";
-			const save = document.createElement("button");
-			save.type = "button";
-			save.textContent = "";
 			const reset = document.createElement("button");
 			reset.type = "button";
 			reset.textContent = "";
 			const btnStyle = themeBtnStyle + ";flex:1";
-			save.style.cssText = btnStyle;
 			reset.style.cssText = btnStyle;
-			btnRow.append(save, reset);
+			btnRow.append(reset);
 			root.append(btnRow);
 			/** Sync the sliders with the given values. */
 			const sync = (panelOpacity, scrimValue) => {
@@ -1590,11 +1584,19 @@ window.__ModuleLoader__.load({
 			};
 			/** Collapsed state: keep only the title bar (toggle the controls). */
 			const controls = [langRow, uploadRow, themeRow, panel.row, scrim.row, btnRow];
+			// Without a custom skin there is nothing to tune: the tuning rows stay
+			// hidden, while language + upload remain usable so a new background
+			// can be picked.
+			const noSkin = skinId === null;
+			const tuningRows = [themeRow, panel.row, scrim.row, btnRow];
 			const collapsedKey = TUNER_COLLAPSE_KEY + skinId;
 			const isCollapsed = () => localStorage.getItem(collapsedKey) === "1";
 			const applyCollapsed = () => {
 				const collapsed = isCollapsed();
 				for (const el of controls) el.style.display = collapsed ? "none" : "";
+				if (noSkin) {
+					for (const el of tuningRows) el.style.display = "none";
+				}
 				title.style.marginBottom = collapsed ? "0" : "10px";
 				collapse.textContent = collapsed ? tunerT("tunerExpand") : tunerT("tunerCollapse");
 			};
@@ -1617,7 +1619,6 @@ window.__ModuleLoader__.load({
 				darkBtn.textContent = tunerT("tunerThemeDark");
 				panel.lab.textContent = tunerT("tunerPanelOpacity");
 				scrim.lab.textContent = tunerT("tunerScrim");
-				save.textContent = tunerT("tunerSave");
 				reset.textContent = tunerT("tunerReset");
 				applyCollapsed();
 			};
@@ -1640,7 +1641,7 @@ window.__ModuleLoader__.load({
 			});
 			syncLangRadios();
 			paintLabels();
-			/** Live rewrite on slider input (persist only via the Save button). */
+			/** Live rewrite + persist on slider input (WYSIWYG: no Save button needed). */
 			const onChange = () => {
 				const values = {
 					panelOpacity: Number(panel.slider.value),
@@ -1649,39 +1650,38 @@ window.__ModuleLoader__.load({
 				sync(values.panelOpacity, values.scrim);
 				tunerApplyTokens(isDark(), values.panelOpacity, values.scrim);
 				tunerApplyBackdrop(values.scrim, isDark());
+				tunerSave(skinId, values);
 			};
 			panel.slider.addEventListener("input", onChange);
 			scrim.slider.addEventListener("input", onChange);
 			lightBtn.addEventListener("click", () => { theme.setTheme("light"); });
 			darkBtn.addEventListener("click", () => { theme.setTheme("dark"); });
-			// Save: persist the current slider values for this skin.
-			save.addEventListener("click", () => {
-				tunerSave(skinId, {
-					panelOpacity: Number(panel.slider.value),
-					scrim: Number(scrim.slider.value)
-				});
-				save.textContent = tunerT("tunerSaved");
-				window.setTimeout(() => { save.textContent = tunerT("tunerSave"); }, 1200);
-			});
-			// Reset: restore the previously saved settings; if none were saved,
-			// drop the inline overrides so the skin's compiled defaults win.
+			// Reset: restore the official default look through the host skin
+			// switch (apply official → reload). Every tuned setting is dropped.
 			reset.addEventListener("click", () => {
-				const saved = tunerLoad(skinId);
-				if (saved !== null) {
-					sync(saved.panelOpacity, saved.scrim);
-					tunerApplyTokens(isDark(), saved.panelOpacity, saved.scrim);
-					tunerApplyBackdrop(saved.scrim, isDark());
-					reset.textContent = tunerT("tunerRestored");
-				} else {
-					const body = document.body;
-					for (const name of TUNER_TOKEN_NAMES) body.style.removeProperty(name);
-					body.style.removeProperty(TUNER_SKELETON_VAR);
-					const current = tunerReadCurrent();
-					tunerApplyBackdrop(current.scrim, isDark());
-					sync(current.panelOpacity, current.scrim);
-					reset.textContent = tunerT("tunerResetDone");
-				}
-				window.setTimeout(() => { reset.textContent = tunerT("tunerReset"); }, 1200);
+				reset.disabled = true;
+				reset.textContent = tunerT("tunerResetting");
+				fetch("/api/skin-center/apply", {
+					method: "POST",
+					headers: { "content-type": "application/json" },
+					body: JSON.stringify({ official: true })
+				}).then(async (response) => {
+					const payload = await response.json().catch(() => null);
+					if (!response.ok || payload?.ok !== true) throw new Error(payload?.error ?? `HTTP ${response.status}`);
+					confirmActive("none").then((confirmed) => {
+						if (confirmed) window.location.reload();
+						else {
+							reset.disabled = false;
+							reset.textContent = tunerT("tunerResetUnconfirmed");
+							window.setTimeout(() => { reset.textContent = tunerT("tunerReset"); }, 3000);
+						}
+					});
+				}).catch((cause) => {
+					reset.disabled = false;
+					const detail = cause instanceof Error ? cause.message : String(cause);
+					reset.textContent = `${tunerT("tunerResetFailed")}（${detail}）`;
+					window.setTimeout(() => { reset.textContent = tunerT("tunerReset"); }, 3000);
+				});
 			});
 			// Re-apply tuned values after any light/dark flip (deferred so the
 			// skin's own observer — which writes the compiled scrim — runs first).
@@ -1705,30 +1705,37 @@ window.__ModuleLoader__.load({
 			return () => {
 				themeObserver.disconnect();
 				root.remove();
-				// Drop the inline token overrides we wrote so the skin stylesheet
-				// (or the next skin) controls these variables again.
-				const body = document.body;
-				for (const name of TUNER_TOKEN_NAMES) body.style.removeProperty(name);
-				body.style.removeProperty(TUNER_SKELETON_VAR);
 			};
 		}
 		/** The tuner switch state: on by default, persisted in localStorage. */
 		function tunerEnabled() {
 			try { return localStorage.getItem(TUNER_ENABLED_KEY) !== "0"; } catch { return true; }
 		}
-		/** (Re)assess whether a custom skin is active and mount/unmount the tuner. */
+		/** Drop the inline token overrides the tuner wrote (used on skin switch). */
+		function tunerClearTokens() {
+			const body = document.body;
+			for (const name of TUNER_TOKEN_NAMES) body.style.removeProperty(name);
+			body.style.removeProperty(TUNER_SKELETON_VAR);
+		}
+		/** (Re)assess the active skin and mount/unmount the tuner. The bar shows
+		* whenever the switch is on — with a custom skin it offers the live
+		* controls; without one (official look) it still shows the upload entry
+		* so a new background can be picked. Switch-off keeps the tuned look. */
 		function tunerSync() {
 			const skinId = tunerSkinId();
-			if (!tunerEnabled() || skinId === null) {
+			if (!tunerEnabled()) {
 				if (tunerMounted !== null) {
 					tunerMounted.cleanup();
 					tunerMounted = null;
 				}
 				return;
 			}
+			// Skin changed (or none): drop the tuner AND its token overrides so a
+			// stale custom look never leaks onto the official skin.
 			if (tunerMounted !== null && tunerMounted.skinId !== skinId) {
 				tunerMounted.cleanup();
 				tunerMounted = null;
+				tunerClearTokens();
 			}
 			if (tunerMounted === null) {
 				tunerMounted = { skinId, cleanup: tunerBuild(skinId, tunerTheme) };

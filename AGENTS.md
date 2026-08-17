@@ -1,116 +1,727 @@
-# dsh-web-ui — 仓库规则
+# DeepSeek Harness 项目 Agent 开发规范
 
-DeepSeek Harness Web GUI 的插件与皮肤全家桶 monorepo。每个插件都是独立的
-cordis bundle 包，经 `cordis.patch.yml` + profile 机制挂载到 `dsh web`，绝不修改
-DSH 源码。改 `packages/` 前先读 [packages/AGENTS.md](packages/AGENTS.md)；写文档
-先读 [docs/AGENTS.md](docs/AGENTS.md)。
+> 项目：dsh-web-ui-custom\
+> 用途：作为 DeepSeek Harness / Agent 在本项目中的长期开发规则。\
+> 目标：在保留官方 upstream
+> 同步能力的同时，安全维护自己的功能、扩展和部署补丁。
 
-## 仓库布局
+------------------------------------------------------------------------
 
-```text
+## 1. 项目身份
+
+项目根目录：
+
+``` text
+D:\deepseek-harness\dsh-web-ui-custom
+```
+
+Git 远程仓库：
+
+``` text
+origin:
+https://github.com/dennyzxf/dsh-web-ui.git
+
+upstream:
+https://github.com/zhu1090093659/dsh-web-ui.git
+```
+
+角色定义：
+
+-   `upstream`：官方源码仓库，只用于获取官方更新。
+-   `origin`：用户自己的 Fork，用于保存自己的修改。
+-   本地项目：所有正式开发工作的唯一工作区。
+
+------------------------------------------------------------------------
+
+## 2. 核心原则
+
+### 2.1 只在 Git 项目中开发
+
+所有源码修改必须发生在：
+
+``` text
+D:\deepseek-harness\dsh-web-ui-custom
+```
+
+禁止把：
+
+``` text
+D:\deepseek-harness\workspace\skins
+```
+
+作为正式开发源。
+
+禁止把：
+
+``` text
+%USERPROFILE%\.dsh\profiles\web\node_modules
+```
+
+作为源码修改位置。
+
+### 2.2 禁止直接修改已安装包
+
+不要直接修改：
+
+``` text
+~\.dsh\profiles\web\node_modules\@linxin666\dsh-client-ui-skin-center\
+```
+
+如果需要修改 skin-center：
+
+1.  修改 Git 项目中的源码。
+2.  运行部署脚本。
+3.  运行 verify。
+4.  通过 Git 保存修改。
+
+### 2.3 不要擅自覆盖用户修改
+
+如果发现工作区存在未提交修改：
+
+``` text
+git status
+```
+
+必须先识别这些修改的来源。
+
+禁止：
+
+``` text
+git reset --hard
+git checkout -- .
+git clean -fd
+```
+
+除非用户明确要求。
+
+禁止为了"解决问题"而删除用户已有文件。
+
+------------------------------------------------------------------------
+
+# 3. 目录职责
+
+## 3.1 官方源码
+
+主要源码位于：
+
+``` text
 packages/
-  dsh-<plugin>/       功能插件包（task-board / git-graph / ssh / pet / live-stats /
-                      aionui-panel / remote-web-ui / web-ui-settings）
-  dsh-skins/          皮肤聚合包：build.mjs 把 skins/* 皮肤资产收进一个 npm 包
-  dsh-web-ui-all/     全家桶聚合包：aggregate.yml 汇总全部功能插件
-  skins/<id>/         皮肤包（skin.json + lib/client.js，资产并入 dsh-skins）
-shared/
-  tsdown.client.ts    唯一共享构建预设（禁止在包内复制）
-  web-platform.ts     客户端平台种子表（浏览器 bundle 纯度门）
-  host/client/        跨包运行时模块唯一事实源；包内同名文件是 sync-shared.mjs 生成的同步副本（禁手改）
-scripts/              仓库维护脚本（聚合生成 / 链接 / 皮肤脚手架 / 校验）
-docs/                 长期文档与归档（见 docs/AGENTS.md）
-gallery/              皮肤画廊静态站（CI 校验与部署）
 ```
 
-## 常用命令
+例如：
 
-```sh
-pnpm install              # 安装依赖（NPM_TOKEN 见 docs/plugins.md 环境说明）
-pnpm build                # 全仓构建（pnpm -r build）
-pnpm test                 # 全仓单测
-pnpm typecheck            # 全仓类型检查
-pnpm test:scripts         # scripts/ 下 *.test.mjs 测试
-pnpm aggregate:check      # 聚合包一致性（CI 门禁）
-pnpm gallery:check        # 画廊产物一致性（CI 门禁）
-pnpm skin-center:check    # 皮肤中心注册表一致性（CI 门禁）
-pnpm docs:check           # 文档一致性（链接 / README / i18n 配对，CI 门禁）
-node scripts/dsh-plugin-new <name>   # 脚手架：新插件包
-node scripts/dsh-skin-new            # 脚手架：新皮肤包
+``` text
+packages/skins/skin-center/
 ```
 
-改动提交前至少跑一遍 `pnpm typecheck && pnpm test && pnpm docs:check`（CI 会全量
-跑所有门禁，见 [docs/development.md](docs/development.md)）。
+skin-center 核心源码：
 
-## 全局约定
+``` text
+packages/skins/skin-center/lib/
+├── index.js
+└── client.js
+```
 
-- **禁止修改 DSH 源码**：挂载只走 `cordis.patch.yml` + profile；tsconfig
-  `extends` / `paths` / `references` 不得指向任何 DSH 源码 checkout；类型只来自
-  `@deepseek-ai/*` 官方 NPM SDK（node_modules 解析），详见
-  [packages/AGENTS.md](packages/AGENTS.md)。
-- **新包一律 `dsh-` 前缀**；npm 包名 `@linxin666/dsh-*`（UI 类插件按惯例
-  `@linxin666/dsh-client-ui-*`）。
-- **构建预设只用 `shared/tsdown.client.ts`**，禁止在包内复制。
-- **禁止使用 emoji**（含 Emoji_Presentation、U+FE0F、ZWJ、区域指示符、Dingbats 等
-  Unicode Emoji 属性字符），覆盖代码、注释、文档、UI 文案、脚本输出与提交信息；
-  需要装饰时用普通字符（`×`、`-`、`*`）或省略。CI 有全树检查。
-- **认证环境**：`NPM_TOKEN` 只放环境变量；token 配置放用户级 `~/.npmrc`，
-  项目 `.npmrc` 只留 scope 映射（详见 docs/plugins.md）。
-- **双语纪律**：主插件包 README 中英配对（`README.md` + `README.zh.md` +
-  `README.i18n.yaml`），皮肤包双语，规则见
-  [docs/AGENTS.md](docs/AGENTS.md) 与 [docs/i18n.md](docs/i18n.md)。
-- **文档随代码更新**：任何改动若触及 README / AGENTS.md / docs/ 描述的行为，
-  必须同 PR 更新文档，否则 `pnpm docs:check` 变红。
-- **一次性记录不进长期文档**：任务交接、验证快照归档到
-  [docs/archive/](docs/archive/)，不混入长期文档目录。
+如果用户要求修改官方 skin-center 核心功能，优先修改这里。
 
-## 开发与贡献流程
+------------------------------------------------------------------------
 
-所有代码改动（本地开发与远程 PR）必须遵循本流程。贡献者入口文档：
-[CONTRIBUTING.md](CONTRIBUTING.md)；日常开发细节见 [docs/development.md](docs/development.md)。
+## 3.2 background-switcher 扩展
 
-### 提交规范（Conventional Commits）
+扩展目录：
 
-提交信息格式 `type(scope): subject`，type 用 `feat` / `fix` / `chore` / `docs` /
-`test` / `refactor` / `perf`，scope 是包名或主题（如 `ssh`、`task-board`、`skins`、
-`readme`、`release`），关联 issue 时 subject 末尾追加 `(#123)`。例：
-`fix(task-board,ssh): hide composer under active panel (#76 #87)`。提交信息与
-代码、注释、文档一样禁止 emoji。
+``` text
+extensions/background-switcher/
+```
 
-### 提交前必过门禁
+结构：
 
-`pnpm typecheck` / `pnpm test` / `pnpm test:scripts` / `pnpm docs:check`
-（涉及聚合包、画廊、皮肤中心时另跑 aggregate/gallery/skin-center 三个
---check）。CI（.github/workflows/ci.yml）全量执行所有门禁，红则 PR 不合并。
+``` text
+extensions/background-switcher/
+├── .dsh/
+│   └── skills/
+│       └── background-switcher/
+├── assets/
+├── lib/
+├── skins/
+└── tools/
+```
 
-### PR 要求（本地与远程一致）
+职责：
 
-- 按 [PR 模板](.github/pull_request_template.md) 填写（摘要、涉及包、类型、AI
-  编码披露、仓库规范检查、本地验证；用户可见变更附证据）。
-- 改包 README 必须同 PR 维护中英三件套并 `pnpm docs:write-pair` 重录配对；
-  任一侧不同步另一侧 `docs:check` 即红。
-- 新增/删除包、改皮肤清单时同步 `docs/publish-prep.md` 与
-  `packages/dsh-web-ui-all/aggregate.yml`（`node scripts/aggregate.mjs` 重生成）。
-- 一次性记录（任务交接、验证快照）进 `docs/archive/`。
+-   `.dsh/skills/`：Agent Skill。
+-   `assets/`：图片及其他素材。
+-   `lib/`：扩展需要维护的运行时代码/补丁源。
+-   `skins/`：皮肤资源。
+-   `tools/`：部署、校验等工具。
 
-### 发布纪律（维护者）
+------------------------------------------------------------------------
 
-发布由 tag 触发（`.github/workflows/release.yml`）：推送 `vX.Y.Z` 后
-`scripts/verify-version.mjs` 校验每个包版本与 tag 一致，不一致则发布前失败；
-Release 更新说明由 `scripts/release-notes.mjs` 从常规提交自动分组生成；
-全部门禁重跑通过后才发 npm。不要直接改包版本号绕过 tag 校验。
+# 4. skin-center 补丁部署规则
 
-## 分层指令体系（渐进式上下文）
+当前补丁部署脚本：
 
-| 文件 | 作用 |
-| --- | --- |
-| 本文件（根 AGENTS.md） | 仓库布局、命令、全局规则，每个会话都需要 |
-| [packages/AGENTS.md](packages/AGENTS.md) | 包级规则：SDK 约束、bundle 形态、测试纪律 |
-| [docs/AGENTS.md](docs/AGENTS.md) | 文档标准：结构分层、写作规则、i18n 配对、预算 |
-| 各包 `AGENTS.md` | 该包特有规则（如 dsh-ssh 安全模型、dsh-skins 构建链） |
+``` text
+extensions/background-switcher/tools/deploy-skin-center-patch.mjs
+```
 
-## 编辑这些指令
+当前补丁源：
 
-规则只在其归属层写一次，其他层引用链接，不重复展开。保持每条规则自包含（1-3
-行），细节链接到归属文档。精简优于扩充；需要更多空间时提高
-`scripts/doc-budgets.manifest.json` 中对应预算并在 PR 说明理由。
+``` text
+extensions/background-switcher/lib/
+├── index.js
+└── client.js
+```
+
+实际生效位置：
+
+``` text
+~/.dsh/profiles/web/node_modules/@linxin666/dsh-client-ui-skin-center/lib/
+```
+
+部署原则：
+
+``` text
+Git 项目源码
+    ↓
+deploy-skin-center-patch.mjs
+    ↓
+已安装 node_modules
+    ↓
+DSH 运行环境
+```
+
+不要反过来直接修改 node_modules。
+
+部署后必须验证：
+
+``` powershell
+node extensions/background-switcher/tools/deploy-skin-center-patch.mjs verify
+```
+
+如果需要部署：
+
+``` powershell
+node extensions/background-switcher/tools/deploy-skin-center-patch.mjs deploy
+```
+
+正常结果应类似：
+
+``` text
+✔ index.js: 一致
+✔ client.js: 一致
+已安装包与补丁源一致。
+```
+
+------------------------------------------------------------------------
+
+# 5. 修改代码的标准流程
+
+Agent 开始工作前：
+
+``` powershell
+cd D:\deepseek-harness\dsh-web-ui-custom
+git status
+```
+
+确认当前状态。
+
+然后：
+
+1.  理解需求。
+2.  查找相关源码。
+3.  修改最小必要范围。
+4.  不修改无关文件。
+5.  运行必要测试。
+6.  检查 Git diff。
+7.  验证部署脚本（如果涉及 skin-center）。
+8.  提交 Git commit。
+
+------------------------------------------------------------------------
+
+# 6. Git 自动提交规则
+
+允许 Agent 在完成开发并验证成功后自动执行：
+
+``` powershell
+git add
+git commit
+```
+
+commit message 使用 Conventional Commits。
+
+例如：
+
+``` text
+feat: add AI background image switching
+fix: fix skin background loading
+refactor: simplify skin center logic
+docs: update background switcher documentation
+chore: update extension configuration
+```
+
+提交前必须检查：
+
+``` powershell
+git status
+git diff
+git diff --cached
+```
+
+不要提交：
+
+``` text
+node_modules/
+*.log
+*.backup
+.DS_Store
+临时文件
+缓存文件
+编辑器生成的临时文件
+```
+
+------------------------------------------------------------------------
+
+# 7. Git Push 规则
+
+默认情况下：
+
+> Agent 可以 commit，但禁止自动 push。
+
+也就是说，正常开发流程：
+
+``` text
+修改
+ ↓
+测试
+ ↓
+git diff
+ ↓
+git add
+ ↓
+git commit
+ ↓
+停止
+```
+
+只有用户明确要求：
+
+``` text
+push
+推送
+上传 GitHub
+同步到 origin
+```
+
+时，才执行：
+
+``` powershell
+git push
+```
+
+不要擅自执行：
+
+``` powershell
+git push --force
+git push --force-with-lease
+```
+
+除非用户明确要求，并且先解释风险。
+
+------------------------------------------------------------------------
+
+# 8. 推荐分支策略
+
+稳定代码：
+
+``` text
+main
+```
+
+新功能优先使用：
+
+``` text
+feature/功能名称
+```
+
+例如：
+
+``` text
+feature/ai-skin-generator
+feature/background-image-generation
+feature/skin-manager
+```
+
+Bug：
+
+``` text
+fix/问题名称
+```
+
+重构：
+
+``` text
+refactor/功能名称
+```
+
+如果用户明确要求直接修改 main，可以直接修改
+main，但不得擅自切换分支造成用户工作丢失。
+
+------------------------------------------------------------------------
+
+# 9. Upstream 同步规则
+
+官方仓库：
+
+``` text
+upstream
+```
+
+检查官方更新：
+
+``` powershell
+git fetch upstream
+```
+
+查看官方新增 commit：
+
+``` powershell
+git log --oneline main..upstream/main
+```
+
+如果需要同步：
+
+``` powershell
+git merge upstream/main
+```
+
+同步前必须：
+
+``` powershell
+git status
+```
+
+如果有未提交修改：
+
+> 不要擅自 stash、reset 或覆盖。
+
+先报告用户。
+
+------------------------------------------------------------------------
+
+# 10. 处理 Merge Conflict
+
+如果出现：
+
+``` text
+CONFLICT
+```
+
+Agent 必须：
+
+1.  停止继续自动合并。
+2.  列出冲突文件。
+3.  解释官方修改与用户修改的大致区别。
+4.  等待用户确认，或者在用户明确授权后解决。
+
+特别是：
+
+``` text
+packages/skins/skin-center/
+```
+
+属于核心源码区域。
+
+不要简单使用：
+
+``` text
+ours
+```
+
+或：
+
+``` text
+theirs
+```
+
+覆盖整个文件。
+
+应尽量保留：
+
+``` text
+官方最新修改
++
+用户自己的功能
+```
+
+------------------------------------------------------------------------
+
+# 11. 官方更新后的补丁处理
+
+官方更新后，必须重新检查：
+
+``` text
+packages/skins/skin-center/
+```
+
+以及：
+
+``` text
+extensions/background-switcher/lib/
+```
+
+是否仍然兼容。
+
+如果官方修改了 skin-center API、路由、插件结构或依赖：
+
+不要直接假设旧补丁仍然可用。
+
+应执行：
+
+``` powershell
+node extensions/background-switcher/tools/deploy-skin-center-patch.mjs verify
+```
+
+必要时：
+
+``` powershell
+node extensions/background-switcher/tools/deploy-skin-center-patch.mjs deploy
+```
+
+然后重新测试。
+
+------------------------------------------------------------------------
+
+# 12. 图片和素材管理
+
+图片位于：
+
+``` text
+extensions/background-switcher/assets/
+```
+
+删除图片之前：
+
+1.  搜索项目中是否引用。
+2.  检查 `skin.json`。
+3.  检查 JS/配置文件。
+4.  确认删除不会导致运行时资源缺失。
+
+PowerShell 示例：
+
+``` powershell
+Get-ChildItem extensions -Recurse | Select-String "图片文件名"
+```
+
+如果没有引用，再删除。
+
+不要为了减少仓库体积而删除仍被皮肤使用的资源。
+
+------------------------------------------------------------------------
+
+# 13. 文件换行格式
+
+本项目在 Windows 环境运行。
+
+如果 Git 出现：
+
+``` text
+LF will be replaced by CRLF
+```
+
+这通常是换行格式提示，不是代码错误。
+
+Agent 不应因为这个警告反复修改源码。
+
+但是如果发现某次修改造成大量无意义的：
+
+``` text
+additions
+deletions
+```
+
+应优先检查是否由：
+
+``` text
+LF / CRLF
+```
+
+导致。
+
+不要把单纯换行变化混入功能 commit。
+
+------------------------------------------------------------------------
+
+# 14. 测试和验证
+
+根据修改范围选择测试。
+
+如果修改：
+
+``` text
+packages/skins/skin-center
+```
+
+至少检查：
+
+``` powershell
+node extensions/background-switcher/tools/deploy-skin-center-patch.mjs verify
+```
+
+如果修改扩展：
+
+检查：
+
+``` text
+extensions/background-switcher/
+```
+
+相关 Skill、脚本、皮肤配置和资源。
+
+如果项目提供：
+
+``` text
+npm test
+npm run build
+pnpm test
+pnpm build
+```
+
+应根据项目实际 package.json 选择正确命令。
+
+不要凭空执行不存在的脚本。
+
+------------------------------------------------------------------------
+
+# 15. Commit 前最终检查
+
+每次准备 commit 时执行：
+
+``` powershell
+git status
+git diff
+git diff --cached
+```
+
+确认：
+
+-   没有无关修改。
+-   没有临时文件。
+-   没有 node_modules。
+-   没有 backup 文件。
+-   没有误删除资源。
+-   没有把用户私有配置提交进去。
+-   功能测试通过。
+
+然后：
+
+``` powershell
+git add <必要文件>
+git commit -m "..."
+```
+
+------------------------------------------------------------------------
+
+# 16. Commit 后报告格式
+
+每次 Agent 自动 commit 后，应向用户报告：
+
+``` text
+开发完成。
+
+修改：
+- xxx
+- xxx
+
+验证：
+- xxx 测试通过
+- deploy verify 通过
+
+Git：
+- Commit: abc1234
+- Message: feat: xxx
+
+当前状态：
+- 是否存在未提交修改
+- 是否已经 push：否
+```
+
+默认不要 push。
+
+------------------------------------------------------------------------
+
+# 17. 安全禁止操作
+
+未经用户明确授权，不执行：
+
+``` powershell
+git reset --hard
+git clean -fd
+git push --force
+git push --force-with-lease
+```
+
+不删除：
+
+``` text
+packages/
+extensions/
+用户创建的资源
+```
+
+不覆盖：
+
+``` text
+用户未提交的修改
+```
+
+不直接修改：
+
+``` text
+~/.dsh/profiles/web/node_modules/
+```
+
+不把：
+
+``` text
+workspace/skins/
+```
+
+重新作为正式源码仓库。
+
+------------------------------------------------------------------------
+
+# 18. 开发目标
+
+本项目采用：
+
+``` text
+官方 upstream
+       ↓
+本地 Git
+       ↓
+用户自己的功能
+       ↓
+extensions
+       ↓
+测试
+       ↓
+commit
+       ↓
+人工确认
+       ↓
+origin
+```
+
+最终目标：
+
+> 能持续吸收官方 dsh-web-ui 更新，同时长期保留用户自己的 AI、皮肤、Skill
+> 和 background-switcher 功能。
+
+任何修改都应该优先考虑：
+
+1.  能否与官方未来版本兼容。
+2.  是否应该做成独立 extension。
+3.  是否会增加未来 merge conflict。
+4.  是否能通过 deploy 脚本恢复运行环境。
+5.  是否能够通过 Git 完整重建开发环境。
